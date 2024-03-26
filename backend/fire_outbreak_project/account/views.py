@@ -11,9 +11,9 @@ from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework.response import Response
 
 
-#Django Modules
-from django.contrib.auth import logout
-from django.contrib.auth import authenticate
+
+from django.contrib.auth import authenticate,login,logout
+
 
 
 #Custom-defined Modules
@@ -21,6 +21,7 @@ from .models import CustomUserModel
 from .serializers import *
 from .view_helper_functions import send_email_verification_code,generate_verification_code,save_in_session
 
+#Receive new normal user details, store in session to be verified and later send code to the Normal user
 class SendNewUserVerificationCode(APIView):
 
     def get_formatted_errors(self, errors):
@@ -66,7 +67,7 @@ class SendNewUserVerificationCode(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-#Would replace this with RegisterUser
+#Verify normal user code and save the session data in the CustomUser Model table
 class VerifyAndCreateUserAccount(APIView):
 
     def get_formatted_errors(self, errors):
@@ -116,12 +117,52 @@ class VerifyAndCreateUserAccount(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 
-
+#Obtain normal user token for authentication
 class MyObtainTokenPairView(TokenObtainPairView):
     permission_classes = (AllowAny,)
     serializer_class = MyTokenObtainPairSerializer
 
+
+#Logout normal user
 class UserLogoutView(APIView):
     def post(self, request):
         logout(request)
         return Response(status=status.HTTP_200_OK)
+
+
+
+# Create Account for the Admin
+class RegisterAdminUserView(generics.CreateAPIView):
+
+    serializer_class = RegisterUserSerializer
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                validated_data = serializer.validated_data
+                role_type = validated_data['role']
+                if role_type == "SuperUser Admins" or role_type =="Other Admins":
+                    serializer.save()
+                    return Response({"message":"Admin Created Successfully"}, status=status.HTTP_201_CREATED)
+                else:
+                    Response({"message":"Choose a role"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except Exception as e:
+            return Response({"errors": f"the error is {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)   
+        
+
+class LoginAdminUser(APIView):
+     def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            password = serializer.validated_data['password']
+
+            user = authenticate(request, email=email, password=password)
+            if user is not None:
+                login(request, user)
+                return Response({"message": "Login successful."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

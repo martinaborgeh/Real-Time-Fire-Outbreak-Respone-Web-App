@@ -52,10 +52,6 @@ export function SubmitNewNormalUserDetails(){
                        return response_data.json()
                     }
                 })
-                .then(response=>{
-                 
-                   {} // Use history.push to navigate
-                })
                 .catch(err=>{
                     
                     console.log("Ooops, We are sorry, system under maintenance")}
@@ -121,10 +117,6 @@ export function VerifyNewNormalUser(){
                        return response_data.json()
                     }
                 })
-                .then(response=>{
-                 
-                    {}// Use history.push to navigate
-                })
                 .catch(err=>{
                     console.log("Ooops, We are sorry, system under maintenance")}
                 )
@@ -188,9 +180,6 @@ export function NormalUserLogin(){
                         navigate("/welcome-normal-user"); 
                        return response_data.json()
                     }
-                })
-                .then(response=>{
-                    
                 })
                 .catch(err=>{
                     console.log("Ooops, We are sorry, system under maintenance")}

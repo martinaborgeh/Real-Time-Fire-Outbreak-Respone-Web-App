@@ -15,6 +15,9 @@ import {ErrorMessage} from "./NormalUser/components/errorpage"
 
 import {NotLoggedIn} from "./NormalUser/components/notloggedin"
 
+import {AdminHomepage} from "./Admin/components/adminhomepage"
+import {AdminUserLogin} from "./Admin/components/adminlogin"
+
 
 
 function App() {
