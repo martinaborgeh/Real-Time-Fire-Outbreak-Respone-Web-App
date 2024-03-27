@@ -27,11 +27,13 @@ function App() {
             <Route path="/submit-new-normal-user-details" element={<SubmitNewNormalUserDetails/>} />
             <Route path="/verify-new-normal-user-details" element={<VerifyNewNormalUser/>} />
             <Route path="/login-normal-user" element={<NormalUserLogin/>} />
-
             <Route path="/welcome-normal-user" element={<WelcomeMessage/>} />
 
-            <Route path="/error-message" element={<ErrorMessage/>} />
+            <Route path="/login-admin-user" element={<AdminUserLogin/>} />
+            <Route path="/admin-homepage" element={<AdminHomepage/>} />
 
+           
+            <Route path="/error-message" element={<ErrorMessage/>} />
             <Route path="/not-logged-in-message" element={<NotLoggedIn/>} />
         </Routes>
     </div>

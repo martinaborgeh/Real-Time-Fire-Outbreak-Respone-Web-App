@@ -72,3 +72,18 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
+    role = serializers.CharField()
+
+
+#Doctor model Serialize
+class CreateRemoveUpdateRetrieveAdminSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField()
+    password = serializers.CharField()
+    password2 =serializers.CharField()
+    email = serializers.EmailField()
+    role = serializers.CharField()
+    class Meta:
+        model = CustomUserModel
+        fields  = ['id', 'full_name', 'password','password2','email','role']
+
+

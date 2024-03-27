@@ -20,12 +20,13 @@ export function AdminUserLogin(){
 
     const LoginData ={
         password,
-        email
+        email,
+        role
    }
         
      const handleSubmit = function(event){
         event.preventDefault()
-        fetch(serverbaseurl+"/accounts/login/",
+        fetch(serverbaseurl+"/accounts/login-admin/",
 
                 {
                     method: 'POST',
@@ -47,7 +48,7 @@ export function AdminUserLogin(){
                             }
                     }else if (response_data.ok) {
                         console.log(response_data.status)
-                        navigate("/welcome-normal-user"); 
+                        navigate("/admin-homepage"); 
                        return response_data.json()
                     }
                 })

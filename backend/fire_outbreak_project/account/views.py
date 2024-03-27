@@ -12,7 +12,9 @@ from rest_framework.response import Response
 
 
 
+
 from django.contrib.auth import authenticate,login,logout
+from django.http import Http404
 
 
 
@@ -117,6 +119,22 @@ class VerifyAndCreateUserAccount(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 
+class UpdateNormalUser(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return CustomUserModel.objects.get(pk=pk)
+        except CustomUserModel.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = CreateRemoveUpdateRetrieveAdminSerializer(snippet)
+        return Response(serializer.data)
+        
+
 #Obtain normal user token for authentication
 class MyObtainTokenPairView(TokenObtainPairView):
     permission_classes = (AllowAny,)
@@ -153,16 +171,116 @@ class RegisterAdminUserView(generics.CreateAPIView):
 
 class LoginAdminUser(APIView):
      def post(self, request, *args, **kwargs):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            password = serializer.validated_data['password']
 
-            user = authenticate(request, email=email, password=password)
-            if user is not None:
-                login(request, user)
-                return Response({"message": "Login successful."}, status=status.HTTP_200_OK)
+        try:
+            serializer = LoginSerializer(data=request.data)
+            if serializer.is_valid():
+                email = serializer.validated_data['email']
+                password = serializer.validated_data['password']
+                role = serializer.validated_data['role']
+                print("role",role)
+
+                user = authenticate(request, email=email, password=password)
+                if user is not None:
+                
+                    if role =="SuperUser Admins" or role =="Other Admins":
+                        print("hello")
+                        login(request, user)
+                        return Response({"message": "Login successful."}, status=status.HTTP_200_OK)
+                    elif role =="Normal User":
+                        return Response({"error": "Only Admins can log in into the admin"}, status=status.HTTP_401_UNAUTHORIZED)
+                else:
+                    return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
             else:
-                return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                print("the serializer error is ",serializer.errors)
+                return Response(serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except Exception as e:
+             print("the error is", e)
+             return Response({"errors": f"the error is {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)   
+        
+class CreateOrGetAllAdmins(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    def get(self, request, format=None):
+        snippets = CustomUserModel.objects.all()
+        serializer =  CreateRemoveUpdateRetrieveAdminSerializer(snippets, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request, format=None):
+        serializer = CreateRemoveUpdateRetrieveAdminSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class GetOneDeleteUpdateAdmin(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return CustomUserModel.objects.get(pk=pk)
+        except CustomUserModel.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = CreateRemoveUpdateRetrieveAdminSerializer(snippet)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = CreateRemoveUpdateRetrieveAdminSerializer(snippet, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        snippet.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+
+
+
+class GetAllNormalUser(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    def get(self, request, format=None):
+        snippets = CustomUserModel.objects.all()
+        serializer =  CreateRemoveUpdateRetrieveAdminSerializer(snippets, many=True)
+        return Response(serializer.data)
+    
+    
+
+class GetOneDeleteNormalUser(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return CustomUserModel.objects.get(pk=pk)
+        except CustomUserModel.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = CreateRemoveUpdateRetrieveAdminSerializer(snippet)
+        return Response(serializer.data)
+
+
+
+    def delete(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        snippet.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
