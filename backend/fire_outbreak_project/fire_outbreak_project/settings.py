@@ -5,6 +5,7 @@ from datetime import timedelta
 
 
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -34,6 +35,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'leaflet',
     'channels',
+    'import_export',
+    'djgeojson',
 
      # Django Apps
     'django.contrib.admin',
@@ -112,11 +115,12 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'account.CustomUserModel'
 
-
+SESSION_COOKIE_HTTPONLY = True 
 
 AUTHENTICATION_BACKENDS = [
     'account.adminrolebanckendauthenticate.RoleBasedBackend',
-     'django.contrib.auth.backends.ModelBackend'
+     'django.contrib.auth.backends.ModelBackend',
+     
  
   
    
@@ -174,8 +178,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=10),
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": False,

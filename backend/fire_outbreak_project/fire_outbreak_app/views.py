@@ -226,3 +226,4 @@ class SearchBasedOnProximity(APIView):
 
         serialized_data = self.search_by_proximity(request)
         return Response(serialized_data)
+    

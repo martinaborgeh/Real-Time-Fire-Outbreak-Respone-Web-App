@@ -16,6 +16,7 @@ urlpatterns = [
  
     #Accounts 
     path("send-new-user-verification-code/", SendNewUserVerificationCode.as_view(), name="send-new-user-verification-code"),
+    path("check-if-user-session-expired/",Check_If_Code_Verification_Expired.as_view(),name = "check-if-user-session-expired"),
     path("verify-new-user-and-create-account/", VerifyAndCreateUserAccount.as_view(), name="send-new-user-verification-code"),
     path("login/", MyObtainTokenPairView.as_view(), name="token_obtain_pair"),
     path("login/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
@@ -27,6 +28,10 @@ urlpatterns = [
     path("update-normal-user/", UpdateNormalUser.as_view(), name="update-normal-user"),
     path("getone-deleteone-normal-user/", GetOneDeleteNormalUser.as_view(), name="getone-deleteone-normal-user"),
     path("getall-normal-users/", GetAllNormalUser.as_view(), name="add-getall-normal-users"),
+    path("check-if-user-is-authenticated/",  CheckIfUserIsAuthenticated.as_view(), name="check-if-user-is-authenticated"),
+
+
+    
     
 
     

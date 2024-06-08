@@ -1,62 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { Link,useNavigate} from 'react-router-dom';
+import React, { useState, useEffect,useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
+import { MapContainer, TileLayer, useMap } from 'react-leaflet'
+
+// Importing user defined modules
+// import { useAuthorization } from "../resusable_function"
 
 export function WelcomeMessage() {
     const [welcomemessage, setwelcomemessage] = useState('');
-    const serverbaseurl = "http://localhost:8000";
 
-    const navigate =  useNavigate ()
+    const serverbaseurl = "http://localhost:8000";
+    const navigate = useNavigate()
 
     useEffect(() => {
-        const access = localStorage.getItem('access');
-        const refreshToken = localStorage.getItem('refreshToken');
 
-      
+        fetch(serverbaseurl + "/accounts/check-if-user-is-authenticated/", {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+        .then(response_data => {
 
-        const handleAuthorization = async (accessToken, refreshToken) => {
-            try {
-                const response = await fetch(serverbaseurl + "/patient-doctor-matching/end-call/", {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ "meeting_id": 'jgghg' }),
-                });
-
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        const newAccessToken = await refreshAccessToken(refreshToken);
-                        if (newAccessToken) {
-                            return await handleAuthorization(newAccessToken, refreshToken);
-                        } else {
-                            console.log("No refresh token available. Redirecting to login.");
-                            navigate("/login-normal-user")
-                            throw new Error('Not authorized');
-                        }
-                    } else if (response.status === 400) {
-                        console.log("Bad request error. Ignoring.");
-                        return response.json();
+            if (!response_data.ok){
+                    if(response_data.status ===401){
+                        console.log("Not Authorized, Enter V")
+                    }else if (response_data.status === 400){
+                        console.log("Something Bad Happened, We would resolve it soon")
+                        navigate("/error-message");
                     }
-                } else {
-                    return response.json();
-                }
-            } catch (error) {
-                console.error('Authorization Error:', error.message);
+            }else if (response_data.ok) {
+                console.log(response_data.status)
+                
+                // console.log("refresh",response_data.refresh)
+            //    return response_data.json()
             }
-        };
-
-        const refreshAccessToken = async (refreshToken) => {
-            // Implement token refresh logic
-        };
-
-        if (access) {
-            // If access token exists, initiate authorization
-            handleAuthorization(access, refreshToken);
-        } else {
-            // Redirect to login page or handle not logged in state
-        }
-    }, [navigate]); // Empty dependency array ensures this effect runs only once on mount
+        
+        })
+        .catch(error => {
+            console.error('Authorization Error:', error.message);
+            return false;
+        });
+    
+        
+    }, []); // Empty dependency array ensures this effect runs only once on mount
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -66,9 +54,9 @@ export function WelcomeMessage() {
     return (
         <div>
             <form onSubmit={handleSubmit}>
-                <div className="VerifyNewNormalUser">
+                <div className="checkifuserisauthorized">
                     <input value={welcomemessage} placeholder='Welcome Message' onChange={e => setwelcomemessage(e.target.value)} type="text" name="hello"></input>
-                    <Link to="/login">Already have an account</Link>
+                    <Link to="/search-for-fireservice">Search For Nearest Fire Station and Call</Link>
                 </div>
             </form>
         </div>

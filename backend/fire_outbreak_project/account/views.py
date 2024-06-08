@@ -9,20 +9,31 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework.response import Response
-
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from datetime import timedelta
 
 
 
 from django.contrib.auth import authenticate,login,logout
 from django.http import Http404
-
+from django.utils import timezone
+from django.conf import settings
 
 
 #Custom-defined Modules
 from .models import CustomUserModel
 from .serializers import *
-from .view_helper_functions import send_email_verification_code,generate_verification_code,save_in_session
+from .view_helper_functions import (
+    send_email_verification_code,
+    generate_verification_code,
+    save_in_session,
+    delete_from_session,
+    check_code_verification_timeout,
+    validate_code_email
+    )
 
+from account.custom_jwt_auth import CustomJWTAuthentication
 #Receive new normal user details, store in session to be verified and later send code to the Normal user
 class SendNewUserVerificationCode(APIView):
 
@@ -55,9 +66,11 @@ class SendNewUserVerificationCode(APIView):
                 validated_data = serializer.validated_data
                 email = validated_data['email']
                 code = generate_verification_code()
-                validated_data['code'] = code
+                validated_data['Code'] = code
+                validated_data['code_verification_timeout'] = timezone.now() + timedelta(minutes=20)
                 save_in_session(request, validated_data)
-                print('session data',request.session['unverified_details'])
+                print("session data",request.session.get('unverified_details', 'Session item not found'))
+            
                 send_email_verification_code(email,code)
                 return Response({'message': 'Email sent successfully'}, status=status.HTTP_200_OK)
             else:
@@ -69,54 +82,79 @@ class SendNewUserVerificationCode(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class Check_If_Code_Verification_Expired(APIView):
+    def post(self, request):
+        session_data = request.session.get('unverified_details')
+        session_email = session_data.get('email')if session_data else None
+        client_email = request.data.get('verify_email')
+        is_code_verify_timeout = check_code_verification_timeout(session_data)
+        if is_code_verify_timeout and client_email !=session_email:
+            return Response({'message': 'Verification Code Expired'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'Verification Not Expired'}, status=250)
+
+
+
+
+
 #Verify normal user code and save the session data in the CustomUser Model table
 class VerifyAndCreateUserAccount(APIView):
 
-    def get_formatted_errors(self, errors):
-        formatted_errors = {}
-        errors_items = errors.items()
-        for field, field_errors in errors_items:
-            if field == 'password':
-                formatted_errors[field] = self.format_password_errors(field_errors)
-            else:
-                formatted_errors[field] = field_errors
-        return formatted_errors
-
-    def format_password_errors(self, password_errors):
-        formatted_password_errors = []
-        for error in password_errors:
-            if 'This field may not be blank.' in error:
-                formatted_password_errors.append('Password is required.')
-            elif 'This password is too short.' in error:
-                formatted_password_errors.append('Password is too short.')
-            # Add more conditions for other password-related errors as needed
-        return formatted_password_errors
-
-    def post(self, request, format=None):
-        print('vsession data',request.session.get('unverified_details'))
+    def post(self, request,*args, **kwargs):
         try:
             session_data = request.session.get('unverified_details')
+            client_code = request.data.get('Code')
+            client_email= request.data.get('verify_email')
+            
             if session_data is None:
-                return Response({"error": "Session data not found"}, status=status.HTTP_400_BAD_REQUEST)
-
-            client_code = request.data.get('code')  # Use request.data to get POST data
-            serializer = RegisterUserSerializer(data=session_data)
-            if serializer.is_valid():
-                # validated_data = serializer.validated_data
-                session_code = session_data['code']
-                if client_code == session_code:
-                    serializer.save()
-                    print("saved successfully")
-                    return Response("Account Created Successfully", status=status.HTTP_201_CREATED)
+                return Response({"message": "Session data not found"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            session_email = session_data['email']
+            
+            is_code_verify_timeout = check_code_verification_timeout(session_data)
+                                                     
+            validate_verify_input =validate_code_email(client_code,client_email,session_email)
+                
+            if not is_code_verify_timeout and validate_verify_input == "client data is validated successfully":
+                serializer = RegisterUserSerializer(data=session_data)
+                if serializer.is_valid():
+                    # validated_data = serializer.validated_data
+                    session_code = session_data['Code']
+                    print("session_code",session_code)
+                    print("clientcode",client_code)
+                    if client_code == session_code:
+                        serializer.save()
+                        print("saved successfully")
+                        del request.session['unverified_details']
+                       
+                        return Response({"message":"Account Created Successfully"}, status=status.HTTP_201_CREATED)
+                    else:
+                        return Response({"message":"Codes are not Equal"}, status=status.HTTP_404_NOT_FOUND)
                 else:
-                    return Response("Codes are not Equal", status=status.HTTP_404_NOT_FOUND)
+                    # errors = self.get_formatted_errors(serializer.errors)
+                    print("Serializer invalid")
+                    return Response({'errors ': "Serializer invalid"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                
+            elif not is_code_verify_timeout and validate_verify_input == "Your input is empty":
+                return Response({'message': "Your input is empty"}, status=250)
+            
+            elif not is_code_verify_timeout and validate_verify_input == "Your input canot be less than 4":
+                return Response({'message': "Your input canot be less than 4"}, status=250)
+            
+            elif not is_code_verify_timeout and validate_verify_input == "You do not have account or your code has expired":
+                return Response({'message': "You do not have account or your code has expired"}, status=250)
+            
+            elif not is_code_verify_timeout and validate_verify_input == "Your email is invalid":
+                return Response({'message': "Your email is invalid"}, status=250)
+            
+
             else:
-                errors = self.get_formatted_errors(serializer.errors)
-                print("errors", errors)
-                return Response({'errors': errors}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                del request.session['unverified_details']
+                return Response({'message': "Code Verification expired"}, status=250)
         except Exception as e:
             print("error is ", e)
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            print("the error is" ,e)
+            return Response({"message": "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         
 
 class UpdateNormalUser(APIView):
@@ -137,8 +175,32 @@ class UpdateNormalUser(APIView):
 
 #Obtain normal user token for authentication
 class MyObtainTokenPairView(TokenObtainPairView):
-    permission_classes = (AllowAny,)
     serializer_class = MyTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        access_token = response.data['access']
+        refresh_token = response.data['refresh']
+        
+        # Set tokens in cookies
+        response.set_cookie('access_token', access_token, httponly=True, max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds())
+        response.set_cookie('refresh_token', refresh_token, httponly=True, max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds())
+        
+        return response
+
+
+
+
+class CheckIfUserIsAuthenticated(APIView):
+    authentication_classes = [CustomJWTAuthentication]
+    def get(self, request,*args, **kwargs):
+        try:     # Your view logic here
+            return Response({"message": "Your response"}, status=status.HTTP_200_OK)
+        except AuthenticationFailed as e:
+            print("error",e)
+            return Response({"message": "Unauthorized","error":e}, status=status.HTTP_401_UNAUTHORIZED)
+
+
 
 
 #Logout normal user

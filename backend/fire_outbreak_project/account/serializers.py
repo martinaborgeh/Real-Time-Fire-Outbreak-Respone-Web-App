@@ -16,7 +16,8 @@ class VerificationEmailSerializer(serializers.Serializer):
         write_only=True, required=True, validators=[validate_password]
     )
     password2 = serializers.CharField(write_only=True, required=True)
-    code = serializers.CharField(read_only=True) 
+    Code = serializers.CharField(read_only=True) 
+    code_verification_timeout =  serializers.DateTimeField(read_only=True)
     
     
 
@@ -27,6 +28,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         if user.role == "Normal User":
             token = super(MyTokenObtainPairSerializer, cls).get_token(user)
             token["email"] = user.email
+            
         
             return token
         else:
