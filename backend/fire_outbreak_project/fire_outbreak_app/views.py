@@ -193,42 +193,6 @@ class GetOneOrUpdateOneFireIncident(APIView):
         fireincidents.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
         
-#This view search fire stations, fire services and roads based on window extent buffer and current location
-# class SearchBestOptimalPath(APIView):
-#     def post(self, request, format=None):
-#         bounds = request.data.get("bounds")
-#         if not bounds:
-#             return Response({"error": "Bounds data not provided"}, status=status.HTTP_400_BAD_REQUEST)
-
-#         incident_lon = request.data.get("starting_point").get("lon")
-#         incident_lat = request.data.get("starting_point").get("lat")
-#         if not incident_lon or not incident_lat:
-#             return Response({"error": "Incident location not provided"}, status=status.HTTP_400_BAD_REQUEST)
-
-#         incident_location = Point(incident_lon, incident_lat, srid=4326)
-
-#         road_data = fetch_road_data_from_db(bounds)
-#         if road_data == "database request not successful":
-#             return Response({"error": "Database request failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#         road_data_geojson = convert_to_geojson(road_data)
-#         graph = create_graph_from_geojson(road_data_geojson)
-
-#         fire_stations, fire_hydrants = get_fire_stations_and_hydrants(bounds)
-
-#         optimal_fire_station_path, fire_station_distance = calculate_optimal_path(graph, incident_location, fire_stations)
-#         optimal_hydrant_path, hydrant_distance = calculate_optimal_path(graph, incident_location, fire_hydrants)
-
-#         response_data = {
-#             "optimal_fire_station_path": optimal_fire_station_path,
-#             "fire_station_distance": fire_station_distance,
-#             "optimal_hydrant_path": optimal_hydrant_path,
-#             "hydrant_distance": hydrant_distance,
-#             "fire_stations": [station.geom.geojson for station in fire_stations],
-#             "fire_hydrants": [hydrant.geom.geojson for hydrant in fire_hydrants],
-#         }
-
-#         return Response(response_data, status=status.HTTP_200_OK)
 
 class SearchBestOptimalPath(APIView):
     async def post(self, request, format=None):
