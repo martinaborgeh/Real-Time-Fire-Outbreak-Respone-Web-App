@@ -29,8 +29,30 @@ class Roads(models.Model):
     # name = models.CharField(max_length=100)
     # geometry = models.LineStringField()
 
-    def __str__(self):
-        return self.name
+    
+class Overpass_Roads(models.Model):
+    u = models.BigIntegerField()
+    v = models.BigIntegerField()
+    key = models.BigIntegerField()
+    osmid = models.CharField(max_length=80)
+    name = models.CharField(max_length=80)
+    highway = models.CharField(max_length=80)
+    oneway = models.IntegerField()
+    reversed = models.CharField(max_length=80)
+    length = models.FloatField()
+    lanes = models.CharField(max_length=80)
+    ref = models.CharField(max_length=80)
+    junction = models.CharField(max_length=80)
+    bridge = models.CharField(max_length=80)
+    maxspeed = models.CharField(max_length=80)
+    service = models.CharField(max_length=80)
+    tunnel = models.CharField(max_length=80)
+    access = models.CharField(max_length=80)
+    geom = models.LineStringField(srid=4326)
+
+    
+    # name = models.CharField(max_length=100)
+    # geometry = models.LineStringField()
 
 class FireHydrants(models.Model):
     region = models.CharField(max_length= 100, verbose_name = "Region",null= True, blank=True) 
@@ -86,5 +108,7 @@ class FireIncident(models.Model):
 
     def __str__(self):
         return f"{self.location}"
+    
+
     
         

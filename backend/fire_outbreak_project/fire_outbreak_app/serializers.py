@@ -12,7 +12,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.geos import LineString
 
 #Custom-created modules
-from .models import FireHydrants,FireStations,FireIncident,Roads
+from .models import FireHydrants,FireStations,FireIncident,Roads,Overpass_Roads
 
 
 
@@ -108,10 +108,7 @@ class AddFireIncidentSerializer(serializers.ModelSerializer):
 
 
 
-class RoadSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Roads
-        fields = ['id', 'name', 'geometry']
+
     
 
 
@@ -183,6 +180,88 @@ class RoadsSerializer(GeoFeatureModelSerializer):
     
     class Meta:
         model = Roads
+        geo_field = "geom"
+        fields = [
+            'u', 'v', 'key', 'osmid', 'name', 'highway', 'oneway', 
+            'reversed', 'length', 'lanes', 'ref', 'junction', 
+            'bridge', 'maxspeed', 'service', 'tunnel', 'access', 'geom'
+        ]
+
+    def validate_geom(self, value):
+        """
+        Validate the geom field to ensure it contains valid LineString geometry.
+        """
+        if not isinstance(value, LineString):
+            raise serializers.ValidationError("The geometry field must be a valid LineString.")
+        return value
+    
+
+class OverpassRoadSerializer(GeoFeatureModelSerializer):
+    osmid = serializers.CharField(
+        max_length=80, 
+    )
+    name = serializers.CharField(
+        max_length=80, 
+        required=False, 
+        allow_blank=True
+    )
+    highway = serializers.CharField(
+        max_length=80
+    )
+    oneway = serializers.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(1)]
+    )
+    reversed = serializers.CharField(
+        max_length=80,
+        required=False,
+        allow_blank=True
+    )
+    length = serializers.FloatField(
+        validators=[MinValueValidator(0.0)]
+    )
+    lanes = serializers.CharField(
+        max_length=80,
+        required=False,
+        allow_blank=True
+    )
+    ref = serializers.CharField(
+        max_length=80,
+        required=False,
+        allow_blank=True
+    )
+    junction = serializers.CharField(
+        max_length=80,
+        required=False,
+        allow_blank=True
+    )
+    bridge = serializers.CharField(
+        max_length=80,
+        required=False,
+        allow_blank=True
+    )
+    maxspeed = serializers.CharField(
+        max_length=80,
+        required=False,
+        allow_blank=True
+    )
+    service = serializers.CharField(
+        max_length=80,
+        required=False,
+        allow_blank=True
+    )
+    tunnel = serializers.CharField(
+        max_length=80,
+        required=False,
+        allow_blank=True
+    )
+    access = serializers.CharField(
+        max_length=80,
+        required=False,
+        allow_blank=True
+    )
+    
+    class Meta:
+        model = Overpass_Roads
         geo_field = "geom"
         fields = [
             'u', 'v', 'key', 'osmid', 'name', 'highway', 'oneway', 

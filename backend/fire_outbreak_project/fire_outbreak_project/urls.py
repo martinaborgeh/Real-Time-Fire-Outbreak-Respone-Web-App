@@ -23,7 +23,7 @@ urlpatterns = [
     #Accounts URL Mapping
     path('accounts/', include('account.urls')),
     path('api-auth/', include('rest_framework.urls')),
-    path('api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path('afire-outbreakpi/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     
     #fire_outbreak_app URL Mapping
     path('fire-outbreak/', include('fire_outbreak_app.urls')),

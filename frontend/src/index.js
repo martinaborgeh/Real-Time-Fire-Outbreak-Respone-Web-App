@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './style.css';
 import './index.css';
 import App from './App';
+import 'leaflet/dist/leaflet.css'
+import "leaflet-control-geocoder/dist/Control.Geocoder.css";
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom'
 

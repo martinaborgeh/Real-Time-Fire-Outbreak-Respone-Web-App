@@ -1,5 +1,6 @@
 #Third Party Modules
-from rest_framework.views import APIView
+# from rest_framework.views import APIView
+from adrf.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser,IsAuthenticatedOrReadOnly
@@ -10,11 +11,24 @@ from django.http import Http404
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import Distance as DistanceMeasure
+from django.http import JsonResponse
+
+
 
 #Custom Defined Modules
 from . models import FireHydrants,FireStations,FireIncident,Roads
-from .serializers import AddFireServiceStationsSerializer,AddFireHydrantSerializer,AddFireIncidentSerializer,RoadSerializer
+from .serializers import AddFireServiceStationsSerializer,AddFireHydrantSerializer,AddFireIncidentSerializer,RoadsSerializer
 from account.permissions import IsOwnerOrReadOnly
+from .view_helper_functions import (
+    fetch_road_data_from_db,
+    create_graph_from_geojson,
+    get_fire_stations_and_hydrants,
+     calculate_optimal_path,
+     convert_to_geojson,
+     format_path_as_geojson
+
+
+    )
 
 
 class CreateOrListFireService(APIView):
@@ -180,50 +194,74 @@ class GetOneOrUpdateOneFireIncident(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
         
 #This view search fire stations, fire services and roads based on window extent buffer and current location
-class SearchBasedOnProximity(APIView):
+# class SearchBestOptimalPath(APIView):
+#     def post(self, request, format=None):
+#         bounds = request.data.get("bounds")
+#         if not bounds:
+#             return Response({"error": "Bounds data not provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_input_details(self, requestdata):
-        x_coordinate = requestdata.POST.get('x_coordinate ')
-        y_coordinate= requestdata.POST.get('y_coordinate ')
-        buffer_distance = requestdata.POST.get('buffer_distance')
-        return x_coordinate,y_coordinate,buffer_distance
+#         incident_lon = request.data.get("starting_point").get("lon")
+#         incident_lat = request.data.get("starting_point").get("lat")
+#         if not incident_lon or not incident_lat:
+#             return Response({"error": "Incident location not provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-    def search_by_proximity(self,requestdata):
-        
-        x_coordinate,y_coordinate,buffer_distance = self.get_input_details(requestdata)
-        current_point = Point(x_coordinate, y_coordinate, srid=4326)  # Use the appropriate coordinates
+#         incident_location = Point(incident_lon, incident_lat, srid=4326)
 
-        # Define the window extent view buffer
-        window_extent_view_buffer = current_point.buffer(buffer_distance)
+#         road_data = fetch_road_data_from_db(bounds)
+#         if road_data == "database request not successful":
+#             return Response({"error": "Database request failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        fire_stations_within_buffer = FireStations.objects.filter(location__intersects=window_extent_view_buffer) \
-        .annotate(distance=Distance('location', current_point))
+#         road_data_geojson = convert_to_geojson(road_data)
+#         graph = create_graph_from_geojson(road_data_geojson)
 
-        # Query fire hydrants within the window extent view buffer
-        fire_hydrants_within_buffer = FireHydrants.objects.filter(location__intersects=window_extent_view_buffer) \
-        .annotate(distance=Distance('location', current_point))
+#         fire_stations, fire_hydrants = get_fire_stations_and_hydrants(bounds)
 
-        # Query roads within the window extent view buffer
-        roads_within_buffer = Roads.objects.filter(geom__intersects=window_extent_view_buffer) \
-       .annotate(distance=Distance('location', current_point))
-  
-        # Serialiszing the results
-        fire_stations_serializer = AddFireServiceStationsSerializer(fire_stations_within_buffer, many=True)
-        fire_hydrants_serializer = AddFireHydrantSerializer(fire_hydrants_within_buffer, many=True)
-        roads_serializer = RoadSerializer(roads_within_buffer, many=True)
-         
-        #Returning response
-        serialized_data = {
-        'fire_stations': fire_stations_serializer.data,
-        'fire_hydrants': fire_hydrants_serializer.data,
-        'roads': roads_serializer.data
+#         optimal_fire_station_path, fire_station_distance = calculate_optimal_path(graph, incident_location, fire_stations)
+#         optimal_hydrant_path, hydrant_distance = calculate_optimal_path(graph, incident_location, fire_hydrants)
+
+#         response_data = {
+#             "optimal_fire_station_path": optimal_fire_station_path,
+#             "fire_station_distance": fire_station_distance,
+#             "optimal_hydrant_path": optimal_hydrant_path,
+#             "hydrant_distance": hydrant_distance,
+#             "fire_stations": [station.geom.geojson for station in fire_stations],
+#             "fire_hydrants": [hydrant.geom.geojson for hydrant in fire_hydrants],
+#         }
+
+#         return Response(response_data, status=status.HTTP_200_OK)
+
+class SearchBestOptimalPath(APIView):
+    async def post(self, request, format=None):
+        bounds = request.data.get("bounds")
+        if not bounds:
+            return Response({"error": "Bounds data not provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        incident_lon = request.data.get("starting_point").get("lon")
+        incident_lat = request.data.get("starting_point").get("lat")
+        if not incident_lon or not incident_lat:
+            return Response({"error": "Incident location not provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        incident_location = Point(incident_lon, incident_lat, srid=4326)
+
+        road_data = await fetch_road_data_from_db(bounds)
+        if road_data == "database request not successful":
+            return Response({"error": "Database request failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        road_data_geojson = await convert_to_geojson(road_data)
+        graph = await create_graph_from_geojson(road_data_geojson)
+
+        fire_stations, fire_hydrants = await get_fire_stations_and_hydrants(bounds)
+
+        optimal_fire_station_path, fire_station_distance = await calculate_optimal_path(graph, incident_location, fire_stations)
+        optimal_hydrant_path, hydrant_distance = await calculate_optimal_path(graph, incident_location, fire_hydrants)
+
+        response_data = {
+            "optimal_fire_station_path":format_path_as_geojson(optimal_fire_station_path),
+            "fire_station_distance": fire_station_distance,
+            "optimal_hydrant_path": format_path_as_geojson(optimal_hydrant_path),
+            "hydrant_distance": hydrant_distance,
+            "fire_stations": [station.geom.geojson for station in fire_stations],
+            "fire_hydrants": [hydrant.geom.geojson for hydrant in fire_hydrants],
         }
-        return serialized_data
 
-
-    def get(self, request, format=None):
-        permission_classes = [IsAuthenticatedOrReadOnly]
-
-        serialized_data = self.search_by_proximity(request)
-        return Response(serialized_data)
-    
+        return Response(response_data, status=status.HTTP_200_OK)
