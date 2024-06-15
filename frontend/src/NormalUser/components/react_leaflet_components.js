@@ -1,4 +1,5 @@
 import React, { useState,useEffect, useRef,useCallback,useMemo} from 'react';
+import retrieveOptimalPath from './osm_overpass_road_data';
 
 
 import {
@@ -12,8 +13,29 @@ import {
   import "leaflet-control-geocoder/dist/Control.Geocoder.js";
   import L from "leaflet";
 
+  // const yellowIcon = new L.Icon({
+  //   iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png',
+  //   iconRetinaUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
+  //   iconSize: [25, 41],
+  //   iconAnchor: [12, 41],
+  //   popupAnchor: [1, -34],
+  //   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  //   shadowSize: [41, 41]
+  // });
+
+  function CustomColor(color) {
+    return new L.Icon({
+      iconUrl: `https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
+      iconRetinaUrl: `https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      shadowSize: [41, 41]
+    });
+  }
   
-  
+
 
 
 export function LocationMarker() {
@@ -193,7 +215,7 @@ export function DraggableMarker() {
         const marker = L.marker(userLocation).addTo(map);
 
         // Define the buffer distances
-        const initialBufferDistance = 5000; // 5 km in meters
+        // const initialBufferDistance = 5000; // 5 km in meters
         const maxBufferDistance = 8000; // 8 km in meters
 
         // Function to calculate bounding box
@@ -205,18 +227,19 @@ export function DraggableMarker() {
         };
 
         // Initial buffer bounds
-        const initialBounds = calculateBounds(initialBufferDistance);
+        // const initialBounds = calculateBounds(initialBufferDistance);
         const maxBounds = calculateBounds(maxBufferDistance);
 
         // Create a rectangle for the initial buffer
-        const initialRectangle = L.rectangle(initialBounds, { color: 'blue', fill: null, weight: 1 }).addTo(map);
+        // const initialRectangle = L.rectangle(initialBounds, { color: 'blue', fill: null, weight: 1 }).addTo(map);
 
         // Zoom to fit the initial buffer rectangle
-        map.fitBounds(initialRectangle.getBounds());
+        // map.fitBounds(initialRectangle.getBounds());
 
         // Create a max buffer rectangle for reference
-        const maxRectangle = L.rectangle(maxBounds, { color: 'red', fill: null, weight: 1 }).addTo(map);
-
+        const maxRectangle = L.rectangle(maxBounds, { color: null, fill: null, weight: 1 }).addTo(map);
+        map.fitBounds(maxRectangle.getBounds())
+      
         // Update the max bounds state
         setMaxBounds(maxRectangle.getBounds());
         setCurrentPosition(current_location)
@@ -225,4 +248,182 @@ export function DraggableMarker() {
 
     return null;
 };
+
+
+
+
+
+export const UpdateDataComponent = ({maxBounds, currentPosition}) => {
+  const [fireStationOptimalPathGeoJsonLayer1, setfireStationOptimalPathGeoJsonLayer1] = useState(null);
+  const [fireStationOptimalPathGeoJsonLayer2, setfireStationOptimalPathGeoJsonLayer2] = useState(null);
+  const [fireStationOptimalPathGeoJsonLayer3, setfireStationOptimalPathGeoJsonLayer3] = useState(null);
+  const [fireHydrantOptimalPathGeoJsonLayer1, setfireHydrantOptimalPathGeoJsonLayer1] = useState(null);
+  const [fireHydrantOptimalPathGeoJsonLayer2, setfireHydrantOptimalPathGeoJsonLayer2] = useState(null);
+  const [fireHydrantOptimalPathGeoJsonLayer3, setfireHydrantOptimalPathGeoJsonLayer3] = useState(null);
+  const [fireHydrantStationsGeoJsonLayer, setfireHydrantStationsGeoJsonLayer] = useState([]);
+  const [fireStationsGeoJsonLayer,setfireStationsGeoJsonLayer] = useState(null)
+
+  const map = useMap()
+  // const [latitude, longitude] = currentPosition;
+  // const userLocation = L.latLng(latitude, longitude);
+  // map.flyTo(userLocation,map.getZoom())
+
+
+
+  const generateCacheKey = (bounds, currentPosition) => {
+    return JSON.stringify({ bounds, currentPosition });
+  };
+
+
+
+  const updateData = async () => {
+
+
+    function update_map(data){
+      
+      if (fireStationOptimalPathGeoJsonLayer1) {
+       
+        map.removeLayer(fireStationOptimalPathGeoJsonLayer1);
+      }
+      const new_firehystations_optimalpath_GeoJsonLayer = L.geoJson(data.optimal_fire_station_paths[0], {
+        style: function (feature) {
+          return {
+            color: 'red'
+          };
+        }
+      }).addTo(map);
+      setfireStationOptimalPathGeoJsonLayer1(new_firehystations_optimalpath_GeoJsonLayer);
+
+      if (fireStationOptimalPathGeoJsonLayer2) {
+        map.removeLayer(fireStationOptimalPathGeoJsonLayer2);
+      }
+      const new_firehystations_optimalpath_GeoJsonLayer2 = L.geoJson(data.optimal_fire_station_paths[1], {
+        style: function (feature) {
+          return {
+            color: 'red'
+          };
+        }
+      }).addTo(map);
+      setfireStationOptimalPathGeoJsonLayer2(new_firehystations_optimalpath_GeoJsonLayer2)
+
+      if (fireStationOptimalPathGeoJsonLayer3) {
+        map.removeLayer(fireStationOptimalPathGeoJsonLayer3);
+      }
+      const new_firehystations_optimalpath_GeoJsonLayer3 = L.geoJson(data.optimal_fire_station_paths[2], {
+        style: function (feature) {
+          return {
+            color: 'red'
+          };
+        }
+      }).addTo(map);
+      setfireStationOptimalPathGeoJsonLayer3(new_firehystations_optimalpath_GeoJsonLayer3)
+
+      
+      if (fireHydrantOptimalPathGeoJsonLayer1) {
+        map.removeLayer(fireHydrantOptimalPathGeoJsonLayer1);
+      }
+      const new_firehydrants_optimalpath_GeoJsonLayer1 = L.geoJson(data.optimal_hydrant_paths[0], {
+        style: function (feature) {
+          return {
+            color: 'yellow'
+          };
+        }
+      }).addTo(map);
+      setfireHydrantOptimalPathGeoJsonLayer1(new_firehydrants_optimalpath_GeoJsonLayer1);
+
+      if (fireHydrantOptimalPathGeoJsonLayer2) {
+       
+        
+        map.removeLayer(fireHydrantOptimalPathGeoJsonLayer2);
+        
+        
+        
+      }
+
+      
+      const new_firehydrants_optimalpath_GeoJsonLayer2 = L.geoJson(data.optimal_hydrant_paths[1], {
+        style: function (feature) {
+          return {
+            color: 'yellow'
+          };
+        }
+      }).addTo(map);
+      
+      setfireHydrantOptimalPathGeoJsonLayer2(new_firehydrants_optimalpath_GeoJsonLayer2);
+
+
+      if (fireHydrantOptimalPathGeoJsonLayer3) {
+        map.removeLayer(fireHydrantOptimalPathGeoJsonLayer3);
+      }
+      const new_firehydrants_optimalpath_GeoJsonLayer3 = L.geoJson(data.optimal_hydrant_paths[2], {
+        style: function (feature) {
+          return {
+            color: 'yellow'
+          };
+        }
+      }).addTo(map);
+      setfireHydrantOptimalPathGeoJsonLayer3(new_firehydrants_optimalpath_GeoJsonLayer3);
+
+      if (fireHydrantStationsGeoJsonLayer) {
+        map.removeLayer(fireHydrantStationsGeoJsonLayer);
+      }
+      const new_firehydrants_stations_GeoJsonLayer = L.geoJson(data.fire_hydrants, {
+        pointToLayer: function (feature, latlng) {
+          return L.marker(latlng, { icon: CustomColor('yellow') });
+        }
+      }).addTo(map);
+      setfireHydrantStationsGeoJsonLayer(new_firehydrants_stations_GeoJsonLayer);
+      
+
+      if (fireStationsGeoJsonLayer) {
+      
+        map.removeLayer(fireStationsGeoJsonLayer);
+
+       
+      }
+      const new_firestations_GeoJsonLayer = L.geoJson(data.fire_stations, {
+        pointToLayer: function (feature, latlng) {
+          return L.marker(latlng, { icon: CustomColor('red') });
+        }
+      }).addTo(map);
+      setfireStationsGeoJsonLayer(new_firestations_GeoJsonLayer);
+    }
+
+
+    if (map && maxBounds && currentPosition) {
+      const bounds = maxBounds;
+      const cacheKey = generateCacheKey(bounds, currentPosition);
+
+      const cachedData = localStorage.getItem(cacheKey);
+
+      if (cachedData && cachedData !== "undefined") {
+        const data = JSON.parse(cachedData);
+        update_map(data)
+      } else {
+        const data = await retrieveOptimalPath(bounds, currentPosition);
+        localStorage.setItem(cacheKey, JSON.stringify(data)); // Store data in localStorage
+        data!==undefined?update_map(data):console.log("data is ",data)
+      }
+    }
+  };
+
+  useEffect(() => {
+
+    if (map) {
+      
+      map.on('reload', updateData);
+      map.on('moveend', updateData);
+    }
+    return () => {
+      if (map) {
+        map.off('reload', updateData);
+        map.off('moveend', updateData);
+      }
+    };
+  }, [map, currentPosition, maxBounds]);
+
+  return null; // UpdateDataComponent doesn't render anything directly
+};
+
+
 

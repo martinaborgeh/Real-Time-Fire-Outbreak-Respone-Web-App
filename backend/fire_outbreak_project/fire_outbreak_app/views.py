@@ -23,9 +23,10 @@ from .view_helper_functions import (
     fetch_road_data_from_db,
     create_graph_from_geojson,
     get_fire_stations_and_hydrants,
-     calculate_optimal_path,
+     calculate_optimal_paths,
      convert_to_geojson,
-     format_path_as_geojson
+     format_path_as_geojson,
+     format_points_as_geojson
 
 
     )
@@ -216,16 +217,16 @@ class SearchBestOptimalPath(APIView):
 
         fire_stations, fire_hydrants = await get_fire_stations_and_hydrants(bounds)
 
-        optimal_fire_station_path, fire_station_distance = await calculate_optimal_path(graph, incident_location, fire_stations)
-        optimal_hydrant_path, hydrant_distance = await calculate_optimal_path(graph, incident_location, fire_hydrants)
+        optimal_fire_station_paths = await calculate_optimal_paths(graph, incident_location, fire_stations)
+        optimal_hydrant_paths = await calculate_optimal_paths(graph, incident_location, fire_hydrants)
 
         response_data = {
-            "optimal_fire_station_path":format_path_as_geojson(optimal_fire_station_path),
-            "fire_station_distance": fire_station_distance,
-            "optimal_hydrant_path": format_path_as_geojson(optimal_hydrant_path),
-            "hydrant_distance": hydrant_distance,
-            "fire_stations": [station.geom.geojson for station in fire_stations],
-            "fire_hydrants": [hydrant.geom.geojson for hydrant in fire_hydrants],
+            "optimal_fire_station_paths": [format_path_as_geojson(path['path']) for path in optimal_fire_station_paths],
+            "fire_station_distances": [path['length'] for path in optimal_fire_station_paths],
+            "optimal_hydrant_paths": [format_path_as_geojson(path['path']) for path in optimal_hydrant_paths],
+            "hydrant_distances": [path['length'] for path in optimal_hydrant_paths],
+            "fire_stations": format_points_as_geojson(fire_stations),
+            "fire_hydrants": format_points_as_geojson(fire_hydrants),
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
