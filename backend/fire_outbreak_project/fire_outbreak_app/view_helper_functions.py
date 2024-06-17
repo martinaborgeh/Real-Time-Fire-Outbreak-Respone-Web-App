@@ -293,11 +293,11 @@ def format_points_as_geojson(points):
 async def calculate_optimal_paths(graph, source, destinations):
     source = (source.x, source.y)
     optimal_paths = []
-    
+    nearest_source = await find_nearest_node(graph, source)
     for dest in destinations:
         dest_point = (dest.geom.x, dest.geom.y)
         try:
-            nearest_source = await find_nearest_node(graph, source)
+            
             nearest_dest = await find_nearest_node(graph, dest_point)
             path = nx.shortest_path(graph, nearest_source, nearest_dest, weight='weight')
             path_length = nx.shortest_path_length(graph, nearest_source, nearest_dest, weight='weight')
