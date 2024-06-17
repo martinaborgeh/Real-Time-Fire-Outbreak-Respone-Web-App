@@ -177,24 +177,30 @@ from asgiref.sync import sync_to_async
 
 
 async def get_from_cache(key):
+    
     cached_data = await cache.aget(key)
     if cached_data:
+        print("Using data from cache")
         return json.loads(cached_data)
     return None
 
 async def save_to_cache(key, data):
+    print("saving to cache")
     await cache.aset(key, json.dumps(data), timeout=3600)
 
 @sync_to_async
 def query_road_data_from_db(bounding_box):
+    print("Using road data from database")
     return list(Roads.objects.filter(geom__intersects=bounding_box))
 
 @sync_to_async
 def query_fire_hydrants(bounding_box):
+    print("retrieving hydrants from db")
     return list(FireHydrants.objects.filter(geom__within=bounding_box))
 
 @sync_to_async
 def query_fire_stations(bounding_box):
+    print("retrieving stations from db")
     return list(FireStations.objects.filter(geom__within=bounding_box))
 
 async def get_fire_stations_and_hydrants(bounds):
@@ -207,6 +213,7 @@ async def get_fire_stations_and_hydrants(bounds):
 
 @sync_to_async
 def convert_to_geojson(road_data):
+    print("converting to geojson")
     features = [
         {
             "type": "Feature",
@@ -228,6 +235,7 @@ def convert_to_geojson(road_data):
 
 @sync_to_async
 def create_graph_from_geojson(geojson_data):
+    print("creating graph")
     G = nx.Graph()
     for feature in geojson_data['features']:
         coords = feature['geometry']['coordinates']
@@ -242,21 +250,24 @@ def distance(point1, point2):
 
 @sync_to_async
 def find_nearest_node(graph, point):
+    print("finding nearest node")
     tree = KDTree([node for node in graph.nodes])
     _, idx = tree.query(point)
     return list(graph.nodes)[idx]
 
-def format_path_as_geojson(path):
+def format_path_as_geojson(path,path_length):
+    print("format optimal path as geojson")
     return {
         "type": "Feature",
         "geometry": {
             "type": "LineString",
             "coordinates": path
         },
-        "properties": {}
+        "properties": {"path_length":path_length}
     }
 
 def format_points_as_geojson(points):
+    print("format destinations as geojson")
     features = []
     for point in points:
         properties = {
@@ -291,6 +302,7 @@ def format_points_as_geojson(points):
     }
 
 async def calculate_optimal_paths(graph, source, destinations):
+    print("Finding optimal path")
     source = (source.x, source.y)
     optimal_paths = []
     nearest_source = await find_nearest_node(graph, source)
@@ -303,18 +315,19 @@ async def calculate_optimal_paths(graph, source, destinations):
             path_length = nx.shortest_path_length(graph, nearest_source, nearest_dest, weight='weight')
             optimal_paths.append({
                 'path': path,
-                'length': path_length,
+                'path_length': path_length,
             })
         except nx.NetworkXNoPath:
             continue
 
     # Sort paths by length (ascending)
-    optimal_paths.sort(key=lambda x: x['length'])
+    optimal_paths.sort(key=lambda x: x['path_length'])
     
     return optimal_paths[:3]  # Return top 3 paths
 
 # New addition of fetch_road_data_from_db function
 async def fetch_road_data_from_db(map_bounds):
+    print("Fetching road data")
     south, west, north, east = map_bounds['south'], map_bounds['west'], map_bounds['north'], map_bounds['east']
     bounding_box = Polygon.from_bbox((west, south, east, north))
     

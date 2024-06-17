@@ -221,8 +221,8 @@ class SearchBestOptimalPath(APIView):
         optimal_hydrant_paths = await calculate_optimal_paths(graph, incident_location, fire_hydrants)
 
         response_data = {
-            "optimal_fire_station_paths": [format_path_as_geojson(path['path']) for path in optimal_fire_station_paths],
-            "optimal_hydrant_paths": [format_path_as_geojson(path['path']) for path in optimal_hydrant_paths],            "fire_stations": format_points_as_geojson(fire_stations),
+            "optimal_fire_station_paths": [format_path_as_geojson(path['path'],path["path_length"]) for path in optimal_fire_station_paths],
+            "optimal_hydrant_paths": [format_path_as_geojson(path['path'],path["path_length"]) for path in optimal_hydrant_paths],            "fire_stations": format_points_as_geojson(fire_stations),
             "fire_hydrants": format_points_as_geojson(fire_hydrants),
         }
 
