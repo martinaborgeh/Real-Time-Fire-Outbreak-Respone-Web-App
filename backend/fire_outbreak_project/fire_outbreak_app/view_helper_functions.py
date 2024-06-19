@@ -1,208 +1,54 @@
+#Third party libraries
 import json
-import requests
 import networkx as nx
 from django.contrib.gis.geos import Point,Polygon
-from django.contrib.gis.db.models.functions import Distance
 from .models import FireStations, FireHydrants,Roads  # Assuming these are your models
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.http import JsonResponse
 from scipy.spatial import KDTree
-from django.core.cache import cache
 from asgiref.sync import sync_to_async
+import math
+import redis
 
 
+#Django Modules
+from django.core.cache import cache
 
-
-
-# async def get_from_cache(key):
-#     cached_data = await cache.aget(key)
-#     if cached_data:
-#         return json.loads(cached_data)
-#     return None
-
-# async def save_to_cache(key, data):
-#     await cache.aset(key, json.dumps(data), timeout=3600)
-
-# @sync_to_async
-# def query_road_data_from_db(bounding_box):
-#     return Roads.objects.filter(geom__intersects=bounding_box)
-
-# async def fetch_road_data_from_db(map_bounds):
-#     south, west, north, east = map_bounds['south'], map_bounds['west'], map_bounds['north'], map_bounds['east']
-#     bounding_box = Polygon.from_bbox((west, south, east, north))
-    
-#     try:
-#         cache_key = f"roads_{south}_{west}_{north}_{east}"
-#         cached_data = await get_from_cache(cache_key)
-#         if cached_data:
-#             print("Using road data from cache")
-#             return cached_data
-#         else:
-#             road_data = await query_road_data_from_db(bounding_box)
-#             road_data_list = [
-#                 {
-#                     'id': road.id,
-#                     'geom': list(road.geom.coords),
-#                     'u': road.u,
-#                     'v': road.v,
-#                     'key': road.key,
-#                     'osmid': road.osmid,
-#                     'name': road.name,
-#                     'highway': road.highway,
-#                     'oneway': road.oneway,
-#                     'reversed': road.reversed,
-#                     'length': road.length,
-#                     'lanes': road.lanes,
-#                     'ref': road.ref,
-#                     'junction': road.junction,
-#                     'bridge': road.bridge,
-#                     'maxspeed': road.maxspeed,
-#                     'service': road.service,
-#                     'tunnel': road.tunnel,
-#                     'access': road.access
-#                 } for road in await sync_to_async(list)(road_data)  # Converting the queryset to a list in a synchronous context
-#             ]
-#             await save_to_cache(cache_key, road_data_list)
-#             print("Using road data from database")
-#             return road_data_list
-#     except Exception as e:
-#         print("Database error", e)
-#         return "database request not successful"
-
-# @sync_to_async
-# def convert_to_geojson(road_data):
-#     features = [
-#         {
-#             "type": "Feature",
-#             "geometry": {
-#                 "type": "LineString",
-#                 "coordinates": element['geom']
-#             },
-#             "properties": {key: value for key, value in element.items() if key != 'geom'}
-#         }
-#         for element in road_data
-#     ]
-    
-#     geojson = {
-#         "type": "FeatureCollection",
-#         "features": features
-#     }
-
-#     return geojson
-
-# @sync_to_async
-# def query_fire_stations(bounding_box):
-#     return list(FireStations.objects.filter(geom__within=bounding_box))
-
-# @sync_to_async
-# def query_fire_hydrants(bounding_box):
-#     return list(FireHydrants.objects.filter(geom__within=bounding_box))
-
-# async def get_fire_stations_and_hydrants(bounds):
-#     south, west, north, east = bounds['south'], bounds['west'], bounds['north'], bounds['east']
-#     bounding_box = Polygon.from_bbox((west, south, east, north))
-#     fire_stations = await query_fire_stations(bounding_box)
-#     fire_hydrants = await query_fire_hydrants(bounding_box)
-#     print("",fire_hydrants,fire_stations)
-#     return fire_stations, fire_hydrants
-
-# @sync_to_async
-# def create_graph_from_geojson(geojson_data):
-#     G = nx.Graph()
-#     for feature in geojson_data['features']:
-#         coords = feature['geometry']['coordinates']
-#         for i in range(len(coords) - 1):
-#             point1 = tuple(coords[i])
-#             point2 = tuple(coords[i + 1])
-#             G.add_edge(point1, point2, weight=distance(point1, point2))
-#     return G
-
-# def distance(point1, point2):
-#     return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2) ** 0.5
-
-# @sync_to_async
-# def find_nearest_node(graph, point):
-#     tree = KDTree([node for node in graph.nodes])
-#     _, idx = tree.query(point)
-#     return list(graph.nodes)[idx]
-
-
-# async def calculate_optimal_path(graph, source, destinations):
-#     source = (source.x, source.y)
-#     optimal_path = None
-#     min_distance = float('inf')
-#     for dest in destinations:
-#         dest_point = (dest.geom.x, dest.geom.y)
-#         try:
-#             nearest_source = await find_nearest_node(graph, source)
-#             nearest_dest = await find_nearest_node(graph, dest_point)
-#             path = nx.shortest_path(graph, nearest_source, nearest_dest, weight='weight')
-#             path_length = nx.shortest_path_length(graph, nearest_source, nearest_dest, weight='weight')
-#             if path_length < min_distance:
-#                 min_distance = path_length
-#                 optimal_path = path
-#         except nx.NetkworXNoPath:
-#             continue
-#     return optimal_path, min_distance
-
-# def format_path_as_geojson(path):
-#     return {
-#         "type": "Feature",
-#         "geometry": {
-#             "type": "LineString",
-#             "coordinates": path
-#         },
-#         "properties": {}
-#     }
-
-# def format_points_as_geojson(points):
-#     features = [
-#         {
-#             "type": "Feature",
-#             "geometry": {
-#                 "type": "Point",
-#                 "coordinates": [point.x, point.y]
-#             },
-#             "properties": {}  # You can add properties here if needed
-#         }
-#         for point in points
-#     ]
-    
-#     return {
-#         "type": "FeatureCollection",
-#         "features": features
-#     }
-
-
+#get data from redis immemory storage
 async def get_from_cache(key):
-    
     cached_data = await cache.aget(key)
     if cached_data:
         print("Using data from cache")
         return json.loads(cached_data)
     return None
 
+
+#Cache data to redis immemory storage
 async def save_to_cache(key, data):
     print("saving to cache")
     await cache.aset(key, json.dumps(data), timeout=3600)
 
+
+#get road data from database within the specified bound
 @sync_to_async
 def query_road_data_from_db(bounding_box):
     print("Using road data from database")
     return list(Roads.objects.filter(geom__intersects=bounding_box))
 
+
+#get fire hydrants from database
 @sync_to_async
 def query_fire_hydrants(bounding_box):
     print("retrieving hydrants from db")
     return list(FireHydrants.objects.filter(geom__within=bounding_box))
 
+
+#get fire station from database
 @sync_to_async
 def query_fire_stations(bounding_box):
     print("retrieving stations from db")
     return list(FireStations.objects.filter(geom__within=bounding_box))
 
+
+#retrieve fire stations and fire hydrants from database
 async def get_fire_stations_and_hydrants(bounds):
     south, west, north, east = bounds['south'], bounds['west'], bounds['north'], bounds['east']
     bounding_box = Polygon.from_bbox((west, south, east, north))
@@ -211,6 +57,8 @@ async def get_fire_stations_and_hydrants(bounds):
     print("",fire_hydrants,fire_stations)
     return fire_stations, fire_hydrants
 
+
+#convert road data to geojsom
 @sync_to_async
 def convert_to_geojson(road_data):
     print("converting to geojson")
@@ -233,8 +81,9 @@ def convert_to_geojson(road_data):
 
     return geojson
 
-@sync_to_async
-def create_graph_from_geojson(geojson_data):
+
+#Create graph from road data
+async def create_graph_from_geojson(geojson_data):
     print("creating graph")
     G = nx.Graph()
     for feature in geojson_data['features']:
@@ -242,12 +91,23 @@ def create_graph_from_geojson(geojson_data):
         for i in range(len(coords) - 1):
             point1 = tuple(coords[i])
             point2 = tuple(coords[i + 1])
-            G.add_edge(point1, point2, weight=distance(point1, point2))
+            G.add_edge(point1, point2, weight= await haversine_distance(point1, point2))
     return G
 
-def distance(point1, point2):
-    return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2) ** 0.5
 
+#Haversine algorithm to calculate distance in kilometres from longitude and latitude
+async def haversine_distance(point1, point2):
+    R = 6371.0
+    lat1, lon1 = math.radians(point1[1]), math.radians(point1[0])
+    lat2, lon2 = math.radians(point2[1]), math.radians(point2[0])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
+
+#find nearest node to source and target
 @sync_to_async
 def find_nearest_node(graph, point):
     print("finding nearest node")
@@ -255,6 +115,8 @@ def find_nearest_node(graph, point):
     _, idx = tree.query(point)
     return list(graph.nodes)[idx]
 
+
+#format output optimal path as geojson
 def format_path_as_geojson(path,path_length):
     print("format optimal path as geojson")
     return {
@@ -266,6 +128,8 @@ def format_path_as_geojson(path,path_length):
         "properties": {"path_length":path_length}
     }
 
+
+#format output destination point(fire station and hydrants) as geojson
 def format_points_as_geojson(points):
     print("format destinations as geojson")
     features = []
@@ -301,6 +165,8 @@ def format_points_as_geojson(points):
         "features": features
     }
 
+
+#Find three most optimal path
 async def calculate_optimal_paths(graph, source, destinations):
     print("Finding optimal path")
     source = (source.x, source.y)
@@ -325,46 +191,82 @@ async def calculate_optimal_paths(graph, source, destinations):
     
     return optimal_paths[:3]  # Return top 3 paths
 
-# New addition of fetch_road_data_from_db function
+
+# fetch_road_data_from_db function
 async def fetch_road_data_from_db(map_bounds):
     print("Fetching road data")
     south, west, north, east = map_bounds['south'], map_bounds['west'], map_bounds['north'], map_bounds['east']
-    bounding_box = Polygon.from_bbox((west, south, east, north))
-    
+    bounding_box = Polygon.from_bbox((west, south, east, north))    
     try:
-        cache_key = f"roads_{south}_{west}_{north}_{east}"
-        cached_data = await get_from_cache(cache_key)
-        if cached_data:
-            print("Using road data from cache")
-            return cached_data
-        else:
-            road_data = await query_road_data_from_db(bounding_box)
-            road_data_list = [
-                {
-                    'id': road.id,
-                    'geom': list(road.geom.coords),
-                    'u': road.u,
-                    'v': road.v,
-                    'key': road.key,
-                    'osmid': road.osmid,
-                    'name': road.name,
-                    'highway': road.highway,
-                    'oneway': road.oneway,
-                    'reversed': road.reversed,
-                    'length': road.length,
-                    'lanes': road.lanes,
-                    'ref': road.ref,
-                    'junction': road.junction,
-                    'bridge': road.bridge,
-                    'maxspeed': road.maxspeed,
-                    'service': road.service,
-                    'tunnel': road.tunnel,
-                    'access': road.access
-                } for road in await sync_to_async(list)(road_data)  # Converting the queryset to a list in a synchronous context
-            ]
-            await save_to_cache(cache_key, road_data_list)
-            print("Using road data from database")
-            return road_data_list
+        road_data = await query_road_data_from_db(bounding_box)
+        road_data_list = [
+            {
+                'id': road.id,
+                'geom': list(road.geom.coords),
+                'u': road.u,
+                'v': road.v,
+                'key': road.key,
+                'osmid': road.osmid,
+                'name': road.name,
+                'highway': road.highway,
+                'oneway': road.oneway,
+                'reversed': road.reversed,
+                'length': road.length,
+                'lanes': road.lanes,
+                'ref': road.ref,
+                'junction': road.junction,
+                'bridge': road.bridge,
+                'maxspeed': road.maxspeed,
+                'service': road.service,
+                'tunnel': road.tunnel,
+                'access': road.access
+            } for road in await sync_to_async(list)(road_data)  # Converting the queryset to a list in a synchronous context
+        ]
+
+        print("Using road data from database")
+        return road_data_list
     except Exception as e:
         print("Database error", e)
         return "database request not successful"
+
+
+#Redis to store current points to geoset
+redis_aioredis_url =  redis.from_url("redis://127.0.0.1:6379/2")
+
+
+#add current location to geoset
+@sync_to_async
+def add_location_t_geoset(setname,longitude,latitude,name):
+    redis_aioredis_url.geoadd(setname, (longitude, latitude,name))
+
+
+#retrieve the most  closest previous incident to the current incident
+@sync_to_async
+def get_by_200m_radius_previous_point(setname,longitude,latitude):
+    nearest_incident = redis_aioredis_url.georadius(
+            setname, 
+            longitude,
+            latitude, 
+            0.2, 
+            unit='km', 
+            count=1, 
+            withdist=True, 
+        )
+    return nearest_incident
+
+
+#function to check previous incidents less than 200m(0.km) buffer away from current incident
+async def check_if_previous_incident_less_200m_from_current_incident(current_incident_point):
+    try:
+        nearest_incident = await get_by_200m_radius_previous_point("incidents",current_incident_point.x,current_incident_point.y)
+        if nearest_incident:
+            nearest_incident_key = nearest_incident[0][0].decode('utf-8').split(',') if nearest_incident else None
+            print("retrieved",Point(float(nearest_incident_key[0]),float(nearest_incident_key[1]),srid=4326))
+            return await get_from_cache(f"cached_response_data{Point(float(nearest_incident_key[0]),float(nearest_incident_key[1]),srid=4326)}") if nearest_incident_key else None
+        else:
+            return None
+    except Exception as e:
+        print("The error is:", e)
+        return None
+
+

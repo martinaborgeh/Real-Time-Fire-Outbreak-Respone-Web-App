@@ -207,7 +207,7 @@ export function DraggableMarker() {
 
     useEffect(() => {
      
-        const current_location = [9.379438, -0.866736]; // Manually set current location
+        const current_location = [9.399497, -0.866736]; // Manually set current location
         const [latitude, longitude] = current_location;
         const userLocation = L.latLng(latitude, longitude);
 
@@ -369,7 +369,7 @@ export const UpdateDataComponent = ({maxBounds, currentPosition}) => {
           const marker = L.marker(latlng, { icon: CustomColor('yellow') });
           marker.bindPopup(`
             <div>
-              <strong>Station ID:</strong> ${feature.properties.station_id}<br/>
+              <strong>Hydrant Station ID:</strong> ${feature.properties.station_id}<br/>
               <strong>Location:</strong> ${feature.properties.location}<br/>
               <strong>Condition:</strong> ${feature.properties.condition}<br/>
               <strong>Type of Hydrant:</strong> ${feature.properties.type_of_hydrant}
@@ -392,7 +392,7 @@ export const UpdateDataComponent = ({maxBounds, currentPosition}) => {
           const marker = L.marker(latlng, { icon: CustomColor('red') });
           marker.bindPopup(`
             <div>
-              <strong>Station ID:</strong> ${feature.properties.station_id}<br/>
+              <strong>Fire Station ID:</strong> ${feature.properties.station_id}<br/>
               <strong>Location:</strong> ${feature.properties.location}<br/>
               <strong>Number of Staff:</strong> ${feature.properties.number_of_staff}<br/>
               <strong>Number of Fire Tenders:</strong> ${feature.properties.number_of_fire_tender}<br/>
