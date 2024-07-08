@@ -11,6 +11,8 @@ import {SubmitNewNormalUserDetails, VerifyNewNormalUser,NormalUserLogin} from '.
 import {SearchFireServicePage} from "./NormalUser/components/searchfireservicepage"
 import {NormalUserCallView} from "./NormalUser/components/callview"
 import {NormalUserEndCallView} from "./NormalUser/components/endcallview"
+import {MapViewOptimalPathStationsHydrants} from "./NormalUser/components/optimalpathmapview"
+import {HomepageView} from "./NormalUser/components/homepage"
 
 import {AdminUserLogin} from "./Admin/components/adminlogin"
 import {AdminHomepage} from "./Admin/components/adminhomepage"
@@ -18,7 +20,7 @@ import {AdminIncomingCallVIew} from "./Admin/components/fireincidentsincomingcal
 import {AdminCallView} from "./Admin/components/admincallview"
 import {AdminEndCallView} from "./Admin/components/adminendcallview"
 
-import {WelcomeMessage} from "./NormalUser/components/welcome"
+
 import {ErrorMessage} from "./NormalUser/components/errorpage"
 import {NotLoggedIn} from "./NormalUser/components/notloggedin"
 
@@ -36,7 +38,8 @@ function App() {
             <Route path="/submit-new-normal-user-details" element={<SubmitNewNormalUserDetails/>} />
             <Route path="/verify-new-normal-user-details" element={<VerifyNewNormalUser/>} />
             <Route path="/login-normal-user" element={<NormalUserLogin/>} />
-            <Route path="/welcome-normal-user" element={<WelcomeMessage/>} />
+            <Route path="welome-to-homepage" element={<HomepageView/>}></Route>
+            <Route path="/mapview-optimalPath-firestations-hydrants" element={<MapViewOptimalPathStationsHydrants/>} />
             <Route path="/search-for-fireservice" element={<SearchFireServicePage/>} />
             <Route path="/call-view" element={<NormalUserCallView/>} />
             <Route path="/end-call-view" element={<NormalUserEndCallView/>} />

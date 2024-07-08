@@ -1,4 +1,4 @@
-import React, { useState,useEffect, useRef,useCallback,useMemo} from 'react';
+import React, { memo,useState,useEffect, useRef,useCallback,useMemo} from 'react';
 import retrieveOptimalPath from './osm_overpass_road_data';
 
 
@@ -10,8 +10,10 @@ import {
     useMap
    } from 'react-leaflet'
 
+   import MarkerClusterGroup from 'react-leaflet-cluster';
+
   import "leaflet-control-geocoder/dist/Control.Geocoder.js";
-  import L from "leaflet";
+  import L, { bounds } from "leaflet";
 
   // const yellowIcon = new L.Icon({
   //   iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png',
@@ -34,7 +36,8 @@ import {
       shadowSize: [41, 41]
     });
   }
-  
+
+
 
 
 
@@ -216,7 +219,7 @@ export function DraggableMarker() {
 
         // Define the buffer distances
         // const initialBufferDistance = 5000; // 5 km in meters
-        const maxBufferDistance = 8000; // 8 km in meters
+        const maxBufferDistance = 5000; // 8 km in meters
 
         // Function to calculate bounding box
         const calculateBounds = (bufferDistance) => {
@@ -253,15 +256,15 @@ export function DraggableMarker() {
 
 
 
-export const UpdateDataComponent = ({maxBounds, currentPosition}) => {
-  const [fireStationOptimalPathGeoJsonLayer1, setfireStationOptimalPathGeoJsonLayer1] = useState(null);
-  const [fireStationOptimalPathGeoJsonLayer2, setfireStationOptimalPathGeoJsonLayer2] = useState(null);
-  const [fireStationOptimalPathGeoJsonLayer3, setfireStationOptimalPathGeoJsonLayer3] = useState(null);
-  const [fireHydrantOptimalPathGeoJsonLayer1, setfireHydrantOptimalPathGeoJsonLayer1] = useState(null);
-  const [fireHydrantOptimalPathGeoJsonLayer2, setfireHydrantOptimalPathGeoJsonLayer2] = useState(null);
-  const [fireHydrantOptimalPathGeoJsonLayer3, setfireHydrantOptimalPathGeoJsonLayer3] = useState(null);
-  const [fireHydrantStationsGeoJsonLayer, setfireHydrantStationsGeoJsonLayer] = useState([]);
-  const [fireStationsGeoJsonLayer,setfireStationsGeoJsonLayer] = useState(null)
+export const UpdateDataComponent = memo(({maxBounds, currentPosition}) => {
+  const fireStationOptimalPathGeoJsonLayer1  = useRef(null);
+  const fireStationOptimalPathGeoJsonLayer2 = useRef(null);
+  const fireStationOptimalPathGeoJsonLayer3 = useRef(null);
+  const fireHydrantOptimalPathGeoJsonLayer1  = useRef(null);
+  const fireHydrantOptimalPathGeoJsonLayer2 = useRef(null);
+  const fireHydrantOptimalPathGeoJsonLayer3  = useRef(null);
+  const fireHydrantStationsGeoJsonLayer = useRef(null);
+  const fireStationsGeoJsonLayer = useRef(null)
 
   const map = useMap()
 
@@ -271,143 +274,154 @@ export const UpdateDataComponent = ({maxBounds, currentPosition}) => {
   };
 
 
-
-  const updateData = async () => {
-
-
-    function update_map(data){
+  const addGeoJonToMap=useCallback(async(data)=>{
+    if (fireStationOptimalPathGeoJsonLayer1.current!==null && map.hasLayer(fireStationOptimalPathGeoJsonLayer1.current)) {
       
-      if (fireStationOptimalPathGeoJsonLayer1) {
-       
-        map.removeLayer(fireStationOptimalPathGeoJsonLayer1);
-      }
-      const new_firehystations_optimalpath_GeoJsonLayer1 = L.geoJson(data.optimal_fire_station_paths[0], {
-        style: { color: 'red' },
-      }).addTo(map);
-      const fire_station_popupContent1 = `
-      <div >
-        <strong>Optimal Path Length:</strong> ${data.optimal_fire_station_paths[0].properties.path_length.toFixed(2)} km
-      </div>`;
-      new_firehystations_optimalpath_GeoJsonLayer1.bindPopup(fire_station_popupContent1);
-      setfireStationOptimalPathGeoJsonLayer1(new_firehystations_optimalpath_GeoJsonLayer1);
+     
+    }else{
+    const new_firehystations_optimalpath_GeoJsonLayer1 = L.geoJson(data.optimal_fire_station_paths[0], {
 
+      style: { color: 'red' },
+    }).addTo(map);
+    const fire_station_popupContent1 = `
+    <div >
+      <strong>Optimal Path Length:</strong> ${data.optimal_fire_station_paths[0].properties.path_length.toFixed(2)} km
+    </div>`;
+    new_firehystations_optimalpath_GeoJsonLayer1.bindPopup(fire_station_popupContent1);
+    fireStationOptimalPathGeoJsonLayer1.current=new_firehystations_optimalpath_GeoJsonLayer1;
+  }
 
-      if (fireStationOptimalPathGeoJsonLayer2) {
-        map.removeLayer(fireStationOptimalPathGeoJsonLayer2);
-      }
-      const new_firehystations_optimalpath_GeoJsonLayer2 = L.geoJson(data.optimal_fire_station_paths[1], {
-        style: { color: 'red' },
-      }).addTo(map);
-      const fire_station_popupContent2= `
-      <div>
-        <strong>Optimal Path Length:</strong> ${data.optimal_fire_station_paths[1].properties.path_length.toFixed(2)} km
-      </div>`;
-      new_firehystations_optimalpath_GeoJsonLayer2.bindPopup(fire_station_popupContent2);
-      setfireStationOptimalPathGeoJsonLayer2(new_firehystations_optimalpath_GeoJsonLayer2)
-
-
-
-      if (fireStationOptimalPathGeoJsonLayer3) {
-        map.removeLayer(fireStationOptimalPathGeoJsonLayer3);
-      }
-      const new_firehystations_optimalpath_GeoJsonLayer3 = L.geoJson(data.optimal_fire_station_paths[2], {
-        style: { color: 'red' },
-      }).addTo(map);
-      const fire_station_popupContent3= `
-      <div>
-        <strong>Optimal Path Length:</strong> ${data.optimal_fire_station_paths[2].properties.path_length.toFixed(2)} km
-      </div>`;
-      new_firehystations_optimalpath_GeoJsonLayer3.bindPopup(fire_station_popupContent3);
-      setfireStationOptimalPathGeoJsonLayer3(new_firehystations_optimalpath_GeoJsonLayer3)
-
-      
-      if (fireHydrantOptimalPathGeoJsonLayer1) {
-        map.removeLayer(fireHydrantOptimalPathGeoJsonLayer1);
-      }
-      const new_firehydrants_optimalpath_GeoJsonLayer1 = L.geoJson(data.optimal_hydrant_paths[0], {
-        style: { color: 'yellow' },
-      }).addTo(map);
-      const fire_hydrant_popupContent1= `
-      <div>
-        <strong>Optimal Path Length:</strong> ${data.optimal_hydrant_paths[0].properties.path_length.toFixed(2)} km
-      </div>`;
-      new_firehydrants_optimalpath_GeoJsonLayer1.bindPopup(fire_hydrant_popupContent1);
-      setfireHydrantOptimalPathGeoJsonLayer1(new_firehydrants_optimalpath_GeoJsonLayer1);
-
-      if (fireHydrantOptimalPathGeoJsonLayer2) {
-        map.removeLayer(fireHydrantOptimalPathGeoJsonLayer2);
-      }
-      const new_firehydrants_optimalpath_GeoJsonLayer2 = L.geoJson(data.optimal_hydrant_paths[1], {
-        style: { color: 'yellow' },
-      }).addTo(map);
-      const fire_hydrant_popupContent2= `
-      <div>
-        <strong>Optimal Path Length:</strong> ${data.optimal_hydrant_paths[1].properties.path_length.toFixed(2)} km
-      </div>`;
-      new_firehydrants_optimalpath_GeoJsonLayer2.bindPopup(fire_hydrant_popupContent2);
-      setfireHydrantOptimalPathGeoJsonLayer2(new_firehydrants_optimalpath_GeoJsonLayer2);
-
-
-      if (fireHydrantOptimalPathGeoJsonLayer3) {
-        map.removeLayer(fireHydrantOptimalPathGeoJsonLayer3);
-      }
-      const new_firehydrants_optimalpath_GeoJsonLayer3 = L.geoJson(data.optimal_hydrant_paths[2], {
-        style: { color: 'yellow' },
-      }).addTo(map);
-      const fire_hydrant_popupContent3= `
-      <div>
-        <strong>Optimal Path Length:</strong> ${data.optimal_hydrant_paths[2].properties.path_length.toFixed(2)} km
-      </div>`;
-      new_firehydrants_optimalpath_GeoJsonLayer3.bindPopup(fire_hydrant_popupContent3);
-      setfireHydrantOptimalPathGeoJsonLayer3(new_firehydrants_optimalpath_GeoJsonLayer3);
-
-      if (fireHydrantStationsGeoJsonLayer) {
-        map.removeLayer(fireHydrantStationsGeoJsonLayer);
-      }
-      const new_firehydrants_stations_GeoJsonLayer = L.geoJson(data.fire_hydrants, {
-        pointToLayer: (feature, latlng) => {
-          const marker = L.marker(latlng, { icon: CustomColor('yellow') });
-          marker.bindPopup(`
-            <div>
-              <strong>Hydrant Station ID:</strong> ${feature.properties.station_id}<br/>
-              <strong>Location:</strong> ${feature.properties.location}<br/>
-              <strong>Condition:</strong> ${feature.properties.condition}<br/>
-              <strong>Type of Hydrant:</strong> ${feature.properties.type_of_hydrant}
-            </div>
-          `);
-          return marker;
-        }
-      }).addTo(map);
-      setfireHydrantStationsGeoJsonLayer(new_firehydrants_stations_GeoJsonLayer);
-      
-
-      if (fireStationsGeoJsonLayer) {
-      
-        map.removeLayer(fireStationsGeoJsonLayer);
-
-       
-      }
-      const new_firestations_GeoJsonLayer = L.geoJson(data.fire_stations, {
-        pointToLayer: (feature, latlng) => {
-          const marker = L.marker(latlng, { icon: CustomColor('red') });
-          marker.bindPopup(`
-            <div>
-              <strong>Fire Station ID:</strong> ${feature.properties.station_id}<br/>
-              <strong>Location:</strong> ${feature.properties.location}<br/>
-              <strong>Number of Staff:</strong> ${feature.properties.number_of_staff}<br/>
-              <strong>Number of Fire Tenders:</strong> ${feature.properties.number_of_fire_tender}<br/>
-              <strong>Number of Portable Pumps:</strong> ${feature.properties.number_of_portable_pumb}<br/>
-              <strong>Number of Recovery Tracks:</strong> ${feature.properties.number_of_recovery_track}<br/>
-              <strong>Number of Water Tankers:</strong> ${feature.properties.number_of_water_tanker}<br/>
-              <button style = "margin-left:40px;margin-top:10px;font-weight: 300;color:white;width:120px;padding-top: 0.4rem;border-radius: 0.75rem;padding-left:0.3rem;padding-right:0.3rem;padding-bottom: 0.4rem;background-color:#002D74">Start Video Call</button>
-            </div>
-          `);
-          return marker;
-        }
-      }).addTo(map);
-      setfireStationsGeoJsonLayer(new_firestations_GeoJsonLayer);
+    if (fireStationOptimalPathGeoJsonLayer2.current!==null && map.hasLayer(fireStationOptimalPathGeoJsonLayer2.current)) {
+   
+      // map.removeLayer(fireStationOptimalPathGeoJsonLayer2);
+    }else{
+    const new_firehystations_optimalpath_GeoJsonLayer2 = L.geoJson(data.optimal_fire_station_paths[1], {
+      style: { color: 'red' },
+    }).addTo(map);
+    const fire_station_popupContent2= `
+    <div>
+      <strong>Optimal Path Length:</strong> ${data.optimal_fire_station_paths[1].properties.path_length.toFixed(2)} km
+    </div>`;
+    new_firehystations_optimalpath_GeoJsonLayer2.bindPopup(fire_station_popupContent2);
+    fireStationOptimalPathGeoJsonLayer2.current=new_firehystations_optimalpath_GeoJsonLayer2
     }
 
+
+    if (fireStationOptimalPathGeoJsonLayer3.current!==null && map.hasLayer(fireStationOptimalPathGeoJsonLayer3.current)) {
+    
+      // map.removeLayer(fireStationOptimalPathGeoJsonLayer3);
+    }else{
+    const new_firehystations_optimalpath_GeoJsonLayer3 = L.geoJson(data.optimal_fire_station_paths[2], {
+      style: { color: 'red' },
+    }).addTo(map);
+    const fire_station_popupContent3= `
+    <div>
+      <strong>Optimal Path Length:</strong> ${data.optimal_fire_station_paths[2].properties.path_length.toFixed(2)} km
+    </div>`;
+    new_firehystations_optimalpath_GeoJsonLayer3.bindPopup(fire_station_popupContent3);
+    fireStationOptimalPathGeoJsonLayer3.current=new_firehystations_optimalpath_GeoJsonLayer3
+  }
+    
+    if (fireHydrantOptimalPathGeoJsonLayer1.current!==null && map.hasLayer(fireHydrantOptimalPathGeoJsonLayer1.current)) {
+     
+      // map.removeLayer(fireHydrantOptimalPathGeoJsonLayer1);
+    }else{
+    const new_firehydrants_optimalpath_GeoJsonLayer1 = L.geoJson(data.optimal_hydrant_paths[0], {
+      style: { color: 'yellow' },
+    }).addTo(map);
+    const fire_hydrant_popupContent1= `
+    <div>
+      <strong>Optimal Path Length:</strong> ${data.optimal_hydrant_paths[0].properties.path_length.toFixed(2)} km
+    </div>`;
+    new_firehydrants_optimalpath_GeoJsonLayer1.bindPopup(fire_hydrant_popupContent1);
+    fireHydrantOptimalPathGeoJsonLayer1.current=new_firehydrants_optimalpath_GeoJsonLayer1;
+  }
+
+    if (fireHydrantOptimalPathGeoJsonLayer2.current!==null && map.hasLayer(fireHydrantOptimalPathGeoJsonLayer2.current)) {
+      
+      // map.removeLayer(fireHydrantOptimalPathGeoJsonLayer2);
+    }else{
+    const new_firehydrants_optimalpath_GeoJsonLayer2 = L.geoJson(data.optimal_hydrant_paths[1], {
+      style: { color: 'yellow' },
+    }).addTo(map);
+    const fire_hydrant_popupContent2= `
+    <div>
+      <strong>Optimal Path Length:</strong> ${data.optimal_hydrant_paths[1].properties.path_length.toFixed(2)} km
+    </div>`;
+    new_firehydrants_optimalpath_GeoJsonLayer2.bindPopup(fire_hydrant_popupContent2);
+    fireHydrantOptimalPathGeoJsonLayer2.current=new_firehydrants_optimalpath_GeoJsonLayer2;
+  }
+
+    if (fireHydrantOptimalPathGeoJsonLayer3.current!==null && map.hasLayer(fireHydrantOptimalPathGeoJsonLayer3.current)) {
+      
+      // map.removeLayer(fireHydrantOptimalPathGeoJsonLayer3);
+    }else{
+    const new_firehydrants_optimalpath_GeoJsonLayer3 = L.geoJson(data.optimal_hydrant_paths[2], {
+      style: { color: 'yellow' },
+    }).addTo(map);
+  
+    const fire_hydrant_popupContent3= `
+    <div>
+      <strong>Optimal Path Length:</strong> ${data.optimal_hydrant_paths[2].properties.path_length.toFixed(2)} km
+    </div>`;
+    new_firehydrants_optimalpath_GeoJsonLayer3.bindPopup(fire_hydrant_popupContent3);
+    fireHydrantOptimalPathGeoJsonLayer3.current=new_firehydrants_optimalpath_GeoJsonLayer3;
+  }
+
+    
+    if (fireHydrantStationsGeoJsonLayer.current!==null && map.hasLayer(fireHydrantStationsGeoJsonLayer.current)) {
+    
+      // map.removeLayer(fireHydrantStationsGeoJsonLayer);
+    }else{
+    const new_firehydrants_stations_GeoJsonLayer = L.geoJson(data.fire_hydrants, {
+      pointToLayer: (feature, latlng) => {
+        const marker = L.marker(latlng, { icon: CustomColor('yellow') });
+        marker.bindPopup(`
+          <div>
+            <strong>Hydrant Station ID:</strong> ${feature.properties.station_id}<br/>
+            <strong>Location:</strong> ${feature.properties.location}<br/>
+            <strong>Condition:</strong> ${feature.properties.condition}<br/>
+            <strong>Type of Hydrant:</strong> ${feature.properties.type_of_hydrant}
+          </div>
+        `);
+        return marker;
+      }
+    }).addTo(map);
+    fireHydrantStationsGeoJsonLayer.current=new_firehydrants_stations_GeoJsonLayer;
+  }
+
+    if (fireStationsGeoJsonLayer.current!==null && map.hasLayer(fireStationsGeoJsonLayer.current)) {
+        
+      // map.removeLayer(fireStationsGeoJsonLayer);
+
+     
+    }else{
+    const new_firestations_GeoJsonLayer = L.geoJson(data.fire_stations, {
+      pointToLayer: (feature, latlng) => {
+        const marker = L.marker(latlng, { icon: CustomColor('red') });
+        marker.bindPopup(`
+          <div>
+            <strong>Fire Station ID:</strong> ${feature.properties.station_id}<br/>
+            <strong>Location:</strong> ${feature.properties.location}<br/>
+            <strong>Number of Staff:</strong> ${feature.properties.number_of_staff}<br/>
+            <strong>Number of Fire Tenders:</strong> ${feature.properties.number_of_fire_tender}<br/>
+            <strong>Number of Portable Pumps:</strong> ${feature.properties.number_of_portable_pumb}<br/>
+            <strong>Number of Recovery Tracks:</strong> ${feature.properties.number_of_recovery_track}<br/>
+            <strong>Number of Water Tankers:</strong> ${feature.properties.number_of_water_tanker}<br/>
+            <button style = "margin-left:40px;margin-top:10px;font-weight: 300;color:white;width:120px;padding-top: 0.4rem;border-radius: 0.75rem;padding-left:0.3rem;padding-right:0.3rem;padding-bottom: 0.4rem;background-color:#002D74">Start Video Call</button>
+          </div>
+        `);
+        return marker;
+      }
+    }).addTo(map);
+    fireStationsGeoJsonLayer.current=new_firestations_GeoJsonLayer;
+  }
+})
+
+
+
+
+  const updateData = useCallback(async () => {
 
     if (map && maxBounds && currentPosition) {
       const bounds = maxBounds;
@@ -416,34 +430,42 @@ export const UpdateDataComponent = ({maxBounds, currentPosition}) => {
       const cachedData = localStorage.getItem(cacheKey);
 
       if (cachedData && cachedData !== "undefined") {
+        // console.log(cachedData)
         const data = JSON.parse(cachedData);
-        console.log("data",data)
-        update_map(data)
+       
+        await addGeoJonToMap(data)
       } else {
         const data = await retrieveOptimalPath(bounds, currentPosition);
         localStorage.setItem(cacheKey, JSON.stringify(data)); // Store data in localStorage
-        data!==undefined?update_map(data):console.log("data is ",data)
+        data!==undefined? await addGeoJonToMap(data):console.log("data is ",data)
       }
     }
-  };
+  },[maxBounds,currentPosition]);
+
+  // useEffect(() =>{
+
+
+
+  // },)
 
   useEffect(() => {
+    updateData()
 
-    if (map) {
+  //   if (map) {
       
-      map.on('reload', updateData);
-      map.on('moveend', updateData);
-    }
-    return () => {
-      if (map) {
-        map.off('reload', updateData);
-        map.off('moveend', updateData);
-      }
-    };
-  }, [map, currentPosition, maxBounds]);
+  //     map.on('reload', updateData);
+  //     map.on('moveend', updateData);
+  //   }
+  //   return () => {
+  //     if (map) {
+  //       map.off('reload', updateData);
+  //       map.off('moveend', updateData);
+  //     }
+  //   };
+  },[map,maxBounds,currentPosition]);
 
   return null; // UpdateDataComponent doesn't render anything directly
-};
+});
 
 
 

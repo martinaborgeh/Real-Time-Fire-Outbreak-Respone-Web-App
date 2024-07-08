@@ -1,6 +1,5 @@
 // Importing user defined modules
 import {DraggableMarker,LocationMarker,UpdateDataComponent,LeafletControlGeocoder,LocateCenterMarkerComponent} from './react_leaflet_components'
-import retrieveOptimalPath from './osm_overpass_road_data'
 import React, { useState, useEffect,useRef} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -29,10 +28,10 @@ const { BaseLayer } = LayersControl;
 
 
 
-export function WelcomeMessage(){
+export function MapViewOptimalPathStationsHydrants(){
   const [maxBounds, setMaxBounds] = useState(null);
   const [currentPosition, setCurrentPosition] = useState(null);
-  const [layers, setLayers] = useState([]);
+
   const serverbaseurl = "http://localhost:8000";
   const navigate = useNavigate()
 
@@ -70,9 +69,9 @@ export function WelcomeMessage(){
   return (
     <div class ="bg-[#dfa674]">
       <h1 class="font-bold text-3xl text-[#002D74]">Real Time Fire Outreak Response</h1>
-      <p class="text-sm mt-4 text-[#002D74]">Choose the closest Station and start a Video Call</p>
+      <p class="sm:text-lg md:text-lg text-sm lg:text-lg mt-4 text-white">Choose the closest Station and start a Video Call</p>
 
-      <MapContainer  style={{ height: "100vh", width: "100vw" }} scrollWheelZoom={true}>
+      <MapContainer    style={{ height: "100vh", width: "100vw" }} scrollWheelZoom={true}>
         <LayersControl position="topright">
           <BaseLayer checked name="Google Satellite">
             <TileLayer
@@ -100,6 +99,8 @@ export function WelcomeMessage(){
         <UpdateDataComponent
           maxBounds={maxBounds}
           currentPosition={currentPosition}
+   
+          
         />
       
       </MapContainer>
