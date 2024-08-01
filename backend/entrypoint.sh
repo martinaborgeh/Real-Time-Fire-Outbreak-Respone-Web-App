@@ -26,4 +26,5 @@ python manage.py createcachetable
 
 
 # Start Gunicorn with the specified configuration
-gunicorn --access-logfile - --workers 3 --threads 3 --worker-connections=1000 --bind 0.0.0.0:8000 fire_outbreak_project.wsgi:application
+# gunicorn --access-logfile - --workers 3 --threads 3 --worker-connections=1000 --bind 0.0.0.0:8000 fire_outbreak_project.wsgi:application
+daphne -b 0.0.0.0:8000 fire_outbreak_project.asgi:application
