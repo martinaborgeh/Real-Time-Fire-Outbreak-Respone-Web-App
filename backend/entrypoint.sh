@@ -29,6 +29,6 @@ python ./fire_outbreak_project/manage.py collectstatic --noinput
 python ./fire_outbreak_project/manage.py createcachetable
 
 
-# Start Gunicorn with the specified configuration
-# gunicorn --access-logfile - --workers 3 --threads 3 --worker-connections=1000 --bind 0.0.0.0:8000 fire_outbreak_project.wsgi:application
+# Start daphne with the specified configuration
+
 daphne -b 0.0.0.0:8000 fire_outbreak_project.asgi:application
