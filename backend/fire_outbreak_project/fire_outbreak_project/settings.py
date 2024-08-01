@@ -64,7 +64,7 @@ INSTALLED_APPS = [
      'account'
 ]
 
-CORS_ALLOW_CREDENTIALS = os.environ.get("CORS_ALLOW_CREDENTIALS")
+CORS_ALLOW_CREDENTIALS = bool(os.environ.get("CORS_ALLOW_CREDENTIALS"))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -118,7 +118,7 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'account.CustomUserModel'
 
-SESSION_COOKIE_HTTPONLY = True 
+SESSION_COOKIE_HTTPONLY = bool(os.environ.get("SESSION_COOKIE_HTTPONLY")) 
 
 AUTHENTICATION_BACKENDS = [
     'account.adminrolebanckendauthenticate.RoleBasedBackend',
