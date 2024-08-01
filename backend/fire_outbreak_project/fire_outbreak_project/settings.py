@@ -2,6 +2,8 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+import dotenv
+dotenv.load_dotenv()
 
 
 
@@ -19,12 +21,12 @@ if os.name == 'nt':
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ep_!k(eq8b*g#tbdov1%249_66e2nh0$$%a6co*y6rld*798$2'
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 
 # Application definition
@@ -62,7 +64,7 @@ INSTALLED_APPS = [
      'account'
 ]
 
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = os.environ.get("CORS_ALLOW_CREDENTIALS")
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -105,11 +107,11 @@ ASGI_APPLICATION = "fire_outbreak_project.asgi.application"
 DATABASES = {
     "default": {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'fireoutbreak1',  # Name of your spatial database
-        'USER': 'postgres',   # Database user
-        'PASSWORD': '0549martin',# Database password
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get("POSTGRES_DB"),  # Name of your spatial database
+        'USER': os.environ.get( "POSTGRES_USER"),   # Database user
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),# Database password
+        'HOST': os.environ.get("DB_HOST"),
+        'PORT': os.environ.get("POSTGRES_PORT"),
     }
 }
 
@@ -170,7 +172,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/django_static/'
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -218,24 +225,20 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    
-]
+CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS").split(" ")
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  #new
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'lordoffin30@gmail.com'
-EMAIL_HOST_PASSWORD = "awsljntgnrksvkro"
-EMAIL_USE_TLS = True
+EMAIL_PORT = os.environ.get("EMAIL_PORT")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS")
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [(os.environ.get("CHANNEL_HOST"), os.environ.get("CHANNEL_PORT"))],
         },
     },
 }
@@ -244,7 +247,7 @@ CHANNEL_LAYERS = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1", # for third-party services use the connection string provided instead
+        "LOCATION": f"redis://{os.environ.get('CACHE_HOST')}:{os.environ.get('CACHE_PORT')}/1", # for third-party services use the connection string provided instead
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }

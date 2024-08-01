@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./django_dockerfile/Dockerfile         
+
+    env_file:
+      - ./backend/fire_outbreak_project/.env
+    volumes:
+      - media:/app/fire_outbreak_project/media
+      - staticfiles:/app/fire_outbreak_project/staticfiles
+      
+    ports:
+      - 8000:8000
+    restart: unless-stopped
+
+
+  nginx:
+    build:
+      context: ./frontend
+      dockerfile: ./react_dockerfile/Dockerfile
+    volumes:
+      - staticfiles:/app/fire_outbreak_project/staticfiles
+      - media:/app/fire_outbreak_project/media
+    ports:
+      - 80:80
+    depends_on:
+      - backend
+    restart: unless-stopped
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+    env_file:
+      - ./backend/fire_outbreak_project/.env
+
+volumes:
+  staticfiles:
+  media:

@@ -1,0 +1,34 @@
+# Use a smaller base image
+FROM python:3.11.8
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gdal-bin python3-gdal postgresql-client && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the requirements file into the container
+COPY ./requirements.txt /app/
+
+# Install Python packages specified in requirements.txt
+RUN python3 -m venv venv && \
+    . venv/bin/activate && \
+    pip install --no-cache-dir -r requirements.txt && \
+    rm -rf /root/.cache/pip
+
+# Copy the rest of the application code into the container
+COPY . /app/
+
+# Copy and set the entrypoint script
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Set the entrypoint
+ENTRYPOINT ["/entrypoint.sh"]

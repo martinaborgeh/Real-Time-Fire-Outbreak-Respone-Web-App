@@ -20,6 +20,7 @@
     "start-js": "react-scripts --openssl-legacy-provider start",
     "build-js": "react-scripts --openssl-legacy-provider build",
     "start": "npm-run-all -p tailwind:watch start-js",
+    "build": "npm-run-all -p tailwind:watch build-js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
