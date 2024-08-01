@@ -31,4 +31,4 @@ python ./fire_outbreak_project/manage.py createcachetable
 
 # Start daphne with the specified configuration
 
-daphne -b 0.0.0.0:8000 fire_outbreak_project.asgi:application
+daphne -b 0.0.0.0 -p 8000 fire_outbreak_project.asgi:application
