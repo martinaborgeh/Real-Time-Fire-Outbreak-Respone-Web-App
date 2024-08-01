@@ -20,9 +20,13 @@ until pg_isready -h $DB_HOST -p $POSTGRES_PORT -U $POSTGRES_USER; do
 done
 
 # Apply database migrations
-python manage.py migrate --noinput
-python manage.py collectstatic --noinput
-python manage.py createcachetable
+
+
+
+
+python ./fire_outbreak_project/manage.py migrate --noinput
+python ./fire_outbreak_project/manage.py collectstatic --noinput
+python ./fire_outbreak_project/manage.py createcachetable
 
 
 # Start Gunicorn with the specified configuration
