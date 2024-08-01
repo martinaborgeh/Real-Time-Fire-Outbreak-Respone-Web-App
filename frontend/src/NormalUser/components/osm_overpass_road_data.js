@@ -31,7 +31,7 @@ import { bounds } from 'leaflet';
 
 
 async function retrieveOptimalPath(map_bounds,current_location) {
-  const serverbaseurl = "http://127.0.0.1:8000";
+  const serverbaseurl = "http://16.171.57.5:8000";
 
 
   try {

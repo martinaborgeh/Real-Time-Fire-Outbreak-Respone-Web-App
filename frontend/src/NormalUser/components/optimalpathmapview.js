@@ -32,7 +32,7 @@ export function MapViewOptimalPathStationsHydrants(){
   const [maxBounds, setMaxBounds] = useState(null);
   const [currentPosition, setCurrentPosition] = useState(null);
 
-  const serverbaseurl = "http://localhost:8000";
+  const serverbaseurl = "http://16.171.57.5:8000";
   const navigate = useNavigate()
 
   useEffect(() => {

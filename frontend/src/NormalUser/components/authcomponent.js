@@ -18,7 +18,7 @@ export function SubmitNewNormalUserDetails(){
 
     const navigate =  useNavigate ()
     
-    const serverbaseurl = "http://localhost:8000"
+    const serverbaseurl = "http://16.171.57.5:8000"
 
     const SignUpData ={
         full_name,
@@ -193,7 +193,7 @@ export function VerifyNewNormalUser(){
     const [code, setcode] = useState(['', '', '', ''])
     const [verify_email, set_verify_email] = useState("No Email")
 
-    const serverbaseurl = "http://localhost:8000"
+    const serverbaseurl = "http://16.171.57.5:8000"
 
     const navigate =  useNavigate ()
 
@@ -400,7 +400,7 @@ export function NormalUserLogin(){
     const [password, setpassword] = useState('')
     const [email, setemail] = useState('')
 
-    const serverbaseurl = "http://localhost:8000"
+    const serverbaseurl = "http://16.171.57.5:8000"
 
     const navigate =  useNavigate ()
 
