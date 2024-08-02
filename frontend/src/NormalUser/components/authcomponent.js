@@ -9,7 +9,8 @@ import React, {useState,useEffect} from 'react'
 
 // import custom defined modules
 import  backendBaseurl from "../../dev_prod_config"
-const backend_server_url = backendBaseurl(process.env.SERVER_MODE)
+const backend_server_url = backendBaseurl(process.env.REACT_APP_SERVER_MODE)
+
 
 export function SubmitNewNormalUserDetails(){
     
@@ -412,6 +413,7 @@ export function NormalUserLogin(){
    }
         
      const handleSubmit = function(event){
+        console.log(serverbaseurl)
         event.preventDefault()
         fetch(serverbaseurl+"/accounts/login/",
 
