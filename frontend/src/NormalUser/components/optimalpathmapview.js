@@ -28,7 +28,7 @@ const { BaseLayer } = LayersControl;
 // import { useAuthorization } from "../resusable_function"
 
 
-const backend_server_url = backendBaseurl(process.env.SERVER_MODE)
+const backend_server_url = backendBaseurl(process.env.REACT_APP_SERVER_MODE)
 
 export function MapViewOptimalPathStationsHydrants(){
   const [maxBounds, setMaxBounds] = useState(null);
