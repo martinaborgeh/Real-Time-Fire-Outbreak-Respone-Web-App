@@ -6,14 +6,14 @@ set -e
 # Activate the virtual environment
 source /app/venv/bin/activate
 
-export PYTHONPATH=/app/fire_outbreak_project/core_settings
+export PYTHONPATH=/app/fire_outbreak_project
 
 
 # Set environment variable for Django settings module
 export DJANGO_SETTINGS_MODULE=fire_outbreak_project.core_settings.production
 
 
-expport DJANGO_ENV = .env.prod 
+export DJANGO_ENV=.env.prod 
 
 # Wait for the database to be ready
 until pg_isready -h $DB_HOST -p $POSTGRES_PORT -U $POSTGRES_USER; do
