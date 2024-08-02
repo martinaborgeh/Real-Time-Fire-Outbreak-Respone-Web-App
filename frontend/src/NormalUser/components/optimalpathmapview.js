@@ -2,6 +2,8 @@
 import {DraggableMarker,LocationMarker,UpdateDataComponent,LeafletControlGeocoder,LocateCenterMarkerComponent} from './react_leaflet_components'
 import React, { useState, useEffect,useRef} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import  backendBaseurl from "../../dev_prod_config"
+
 
 import {
      MapContainer, 
@@ -26,13 +28,13 @@ const { BaseLayer } = LayersControl;
 // import { useAuthorization } from "../resusable_function"
 
 
-
+const backend_server_url = backendBaseurl(process.env.SERVER_MODE)
 
 export function MapViewOptimalPathStationsHydrants(){
   const [maxBounds, setMaxBounds] = useState(null);
   const [currentPosition, setCurrentPosition] = useState(null);
 
-  const serverbaseurl = "http://16.171.57.5:8000";
+  const serverbaseurl = backend_server_url;;
   const navigate = useNavigate()
 
   useEffect(() => {

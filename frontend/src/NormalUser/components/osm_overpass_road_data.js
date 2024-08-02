@@ -1,5 +1,9 @@
 import axios from 'axios';
 import { bounds } from 'leaflet';
+
+import  backendBaseurl from "../../dev_prod_config"
+const backend_server_url = backendBaseurl(process.env.SERVER_MODE)
+
 // import osmtogeojson from 'osmtogeojson';
 
 // async function fetchRoadDataOverpass(bounds) {
@@ -31,7 +35,7 @@ import { bounds } from 'leaflet';
 
 
 async function retrieveOptimalPath(map_bounds,current_location) {
-  const serverbaseurl = "http://16.171.57.5:8000";
+  const serverbaseurl = backend_server_url;
 
 
   try {
