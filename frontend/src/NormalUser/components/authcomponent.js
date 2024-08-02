@@ -8,6 +8,8 @@ import React, {useState,useEffect} from 'react'
 
 
 // import custom defined modules
+import  backendBaseurl from "../../dev_prod_config"
+const backend_server_url = backendBaseurl(process.env.SERVER_MODE)
 
 export function SubmitNewNormalUserDetails(){
     
@@ -18,7 +20,7 @@ export function SubmitNewNormalUserDetails(){
 
     const navigate =  useNavigate ()
     
-    const serverbaseurl = "http://16.171.57.5:8000"
+    const serverbaseurl = backend_server_url
 
     const SignUpData ={
         full_name,
@@ -193,7 +195,7 @@ export function VerifyNewNormalUser(){
     const [code, setcode] = useState(['', '', '', ''])
     const [verify_email, set_verify_email] = useState("No Email")
 
-    const serverbaseurl = "http://16.171.57.5:8000"
+    const serverbaseurl = backend_server_url
 
     const navigate =  useNavigate ()
 
@@ -400,7 +402,7 @@ export function NormalUserLogin(){
     const [password, setpassword] = useState('')
     const [email, setemail] = useState('')
 
-    const serverbaseurl = "http://16.171.57.5:8000"
+    const serverbaseurl = backend_server_url
 
     const navigate =  useNavigate ()
 

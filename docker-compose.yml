@@ -7,7 +7,7 @@ services:
       dockerfile: ./django_dockerfile/Dockerfile         
 
     env_file:
-      - ./backend/fire_outbreak_project/.env
+      - ./backend/fire_outbreak_project/.env.prod
     volumes:
       - media:/app/fire_outbreak_project/media
       - staticfiles:/app/fire_outbreak_project/staticfiles

@@ -24,11 +24,12 @@ if os.name == 'nt':
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG").lower() in ["true","True","TRUE", "1"]
+DEBUG = bool(os.environ.get("DEBUG"))
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
-
+#Trusted Origins
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(" ")
 # Application definition
 
 INSTALLED_APPS = [
@@ -64,7 +65,7 @@ INSTALLED_APPS = [
      'account'
 ]
 
-CORS_ALLOW_CREDENTIALS = os.environ.get("CORS_ALLOW_CREDENTIALS").lower() in ["true","True","TRUE", "1"]
+CORS_ALLOW_CREDENTIALS = bool(os.environ.get("CORS_ALLOW_CREDENTIALS"))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -118,7 +119,7 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'account.CustomUserModel'
 
-SESSION_COOKIE_HTTPONLY = os.environ.get("SESSION_COOKIE_HTTPONLY").lower() in ["true","True","TRUE", "1"]
+SESSION_COOKIE_HTTPONLY = bool(os.environ.get("SESSION_COOKIE_HTTPONLY")) 
 
 AUTHENTICATION_BACKENDS = [
     'account.adminrolebanckendauthenticate.RoleBasedBackend',
@@ -232,7 +233,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS").lower() in ["true","True","TRUE", "1"]
+EMAIL_USE_TLS = bool(os.environ.get("EMAIL_USE_TLS"))
 
 CHANNEL_LAYERS = {
     "default": {
