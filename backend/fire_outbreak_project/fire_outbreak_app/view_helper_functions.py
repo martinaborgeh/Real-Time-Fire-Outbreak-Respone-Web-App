@@ -7,6 +7,12 @@ from scipy.spatial import KDTree
 from asgiref.sync import sync_to_async
 import math
 import redis
+import os
+import dotenv
+
+
+env_file = os.getenv('DJANGO_ENV') 
+dotenv.load_dotenv(env_file if env_file else '.env.dev')
 
 
 #Django Modules
@@ -231,7 +237,7 @@ async def fetch_road_data_from_db(map_bounds):
 
 
 #Redis to store current points to geoset
-redis_aioredis_url =  redis.from_url("redis://127.0.0.1:6379/2")
+redis_aioredis_url =  redis.from_url(f"redis://{os.environ.get('CACHE_HOST')}:{os.environ.get('CACHE_PORT')}/2")
 
 
 #add current location to geoset

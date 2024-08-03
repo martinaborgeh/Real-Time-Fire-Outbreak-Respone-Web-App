@@ -36,7 +36,6 @@ services:
     restart: unless-stopped
     env_file:
       - ./backend/fire_outbreak_project/.env.prod
-
 volumes:
   staticfiles:
   media:
