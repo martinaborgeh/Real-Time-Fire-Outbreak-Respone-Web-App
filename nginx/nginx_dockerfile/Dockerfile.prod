@@ -1,7 +1,9 @@
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
 
-ENV REACT_APP_HOST_IP_ADDRESS http://16.171.57.5:80
-ENV REACT_APP_SERVER_MODE production
+
 # Copy Nginx configuration file
 COPY ./nginx_config/nginx.prod.conf /etc/nginx/nginx.conf
+
+ENV REACT_APP_HOST_IP_ADDRESS http://16.171.57.5:80
+ENV REACT_APP_SERVER_MODE production
