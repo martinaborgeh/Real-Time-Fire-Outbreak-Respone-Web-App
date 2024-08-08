@@ -38,8 +38,9 @@ services:
       - react_build:/usr/share/nginx/html
     ports:
       - 80:80
-
     restart: unless-stopped
+    env_file:
+      - ./frontend/.env.dev
 
   frontend:
     build:
