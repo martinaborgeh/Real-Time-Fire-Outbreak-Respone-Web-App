@@ -38,8 +38,7 @@ services:
       - react_build:/usr/share/nginx/html
     ports:
       - 80:80
-    depends_on:
-      - frontend
+
     restart: unless-stopped
 
   frontend:
@@ -50,7 +49,7 @@ services:
       - react_build:/app/build
     depends_on:
       - backend
-    restart: 'no'
+    # restart: 'no'
 
   redis:
     image: redis:latest
