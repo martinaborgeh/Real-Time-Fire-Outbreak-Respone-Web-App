@@ -16,7 +16,7 @@ from django.core.asgi import get_asgi_application
 
 from fire_outbreak_app.websocket_urls import websocket_urlpatterns
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fire_outbreak_project.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fire_outbreak_project.core_settings.local")
 
 django_asgi_app = get_asgi_application()
 

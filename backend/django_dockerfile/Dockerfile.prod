@@ -1,5 +1,5 @@
 # Use a smaller base image
-FROM python:3.11.8
+FROM --platform=linux/amd64 python:3.11.8
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -27,7 +27,7 @@ RUN python3 -m venv venv && \
 COPY . /app/
 
 # Copy and set the entrypoint script
-COPY ./entrypoint.sh /entrypoint.sh
+COPY ./entrypoint.prod.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Set the entrypoint

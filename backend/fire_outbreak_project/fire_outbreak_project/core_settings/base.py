@@ -4,7 +4,7 @@ from pathlib import Path
 from datetime import timedelta
 import dotenv
 env_file = os.getenv('DJANGO_ENV') 
-dotenv.load_dotenv(env_file if env_file else '.env.dev')
+dotenv.load_dotenv(env_file if env_file else '.env.local')
 
 
 

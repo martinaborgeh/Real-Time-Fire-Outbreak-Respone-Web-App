@@ -264,10 +264,10 @@ export function VerifyNewNormalUser(){
                                         console.log(response_data.message)
                                     }
                             }else if (response_data.ok) {
-                                    if (response_data.status ===200){
+                                    if (response_data.status ===201){
                                     console.log(response_data.message)
                                     localStorage.clear()
-                                    navigate("/submit-new-normal-user-details");
+                                    navigate("/welome-to-homepage");
 
                                     // return response_data.json()
                                     }else if (response_data.status ===250){
@@ -307,7 +307,7 @@ export function VerifyNewNormalUser(){
                         const is_email = localStorage.getItem("Email")
                         is_email?localStorage.clear():console.log("No email stored")
                         set_verify_email(verify_email) // set No Mail
-                        navigate()
+                        // navigate()
 
                         console.log("Code verificatio has expired")
                     }else if (response_data.status ===250){

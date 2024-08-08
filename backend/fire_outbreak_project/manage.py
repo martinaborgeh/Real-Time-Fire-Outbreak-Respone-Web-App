@@ -6,7 +6,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'fire_outbreak_project.core_settings.development')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'fire_outbreak_project.core_settings.local')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

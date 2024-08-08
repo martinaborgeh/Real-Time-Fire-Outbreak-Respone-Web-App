@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+
+  db:
+    image: postgis/postgis
+    ports:
+      - "5432:5432"
+    volumes:
+      - posgresdata:/var/lib/postgresql/data
+      - ./backend/init_extension.sql:/docker-entrypoint-initdb.d/init_extension.sql
+    env_file:
+      - ./backend/fire_outbreak_project/.env.dev
+    restart: always
+    
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./django_dockerfile/Dockerfile.dev
+    env_file:
+      - ./backend/fire_outbreak_project/.env.dev
+    volumes:
+      - media:/app/fire_outbreak_project/fire_outbreak_project/media
+      - staticfiles:/app/fire_outbreak_project/fire_outbreak_project/staticfiles
+    ports:
+      - 8000:8000
+    restart: unless-stopped
+    depends_on:
+      - db
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: ./nginx_dockerfile/Dockerfile.dev
+    volumes:
+      - staticfiles:/app/fire_outbreak_project/fire_outbreak_project/staticfiles
+      - media:/app/fire_outbreak_project/fire_outbreak_project/media
+      - react_build:/usr/share/nginx/html
+    ports:
+      - 80:80
+    depends_on:
+      - frontend
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./react_dockerfile/Dockerfile.dev
+    volumes:
+      - react_build:/app/build
+    depends_on:
+      - backend
+    restart: 'no'
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+    env_file:
+      - ./backend/fire_outbreak_project/.env.dev
+
+volumes:
+  staticfiles:
+  media:
+  posgresdata:
+  react_build:
