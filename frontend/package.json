@@ -19,8 +19,8 @@
   "scripts": {
     "tailwind:build": "tailwindcss -i src/index.css -o src/style.css",
     "tailwind:watch": "tailwindcss -i src/index.css -o src/style.css --watch",
-    "start-js": "env-cmd -f ./.env.dev react-scripts --openssl-legacy-provider start",
-    "build-js": "env-cmd -f ./.env.prod react-scripts --openssl-legacy-provider build",
+    "start-js": "env-cmd -f /app/.env.dev react-scripts --openssl-legacy-provider start",
+    "build-js": "env-cmd -f /app/.env.prod react-scripts --openssl-legacy-provider build",
     "start": "npm-run-all -p tailwind:watch start-js",
     "build": "npm-run-all tailwind:build build-js",
     "test": "react-scripts test",

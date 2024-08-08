@@ -24,6 +24,7 @@ services:
       - staticfiles:/app/fire_outbreak_project/fire_outbreak_project/staticfiles
       - media:/app/fire_outbreak_project/fire_outbreak_project/media
       - react_build:/usr/share/nginx/html
+      - react_app:/app/
     ports:
       - 80:80
     depends_on:
@@ -38,6 +39,7 @@ services:
       dockerfile: ./react_dockerfile/Dockerfile.prod
     volumes:
       - react_build:/app/build
+      - react_app:/app/
     depends_on:
       - backend
     restart: 'no'
@@ -52,3 +54,4 @@ volumes:
   staticfiles:
   media:
   react_build:
+  react_app:

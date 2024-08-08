@@ -32,6 +32,7 @@ export function SubmitNewNormalUserDetails(){
              
      const handleSubmit = function(event){
         event.preventDefault()
+        console.log(backend_server_url)
         fetch(serverbaseurl+"/accounts/send-new-user-verification-code/",
                 {
                     method: 'POST',
