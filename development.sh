@@ -3,6 +3,7 @@
 # Clear the .dockerignore files
 truncate -s 0 ./backend/.dockerignore 
 truncate -s 0 ./frontend/.dockerignore
+truncate -s 0 ./nginx/.dockerignore
  
 
 # Copy backend prod files into .dockerignore file
