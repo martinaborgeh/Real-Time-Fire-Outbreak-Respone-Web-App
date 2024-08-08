@@ -29,8 +29,7 @@ services:
     depends_on:
       - frontend
     restart: unless-stopped
-    env_file:
-      - ./frontend/.env.prod
+  
 
 
   frontend:
@@ -48,8 +47,7 @@ services:
     ports:
       - 6379:6379
     restart: unless-stopped
-    env_file:
-      - ./backend/fire_outbreak_project/.env.prod
+
 volumes:
   staticfiles:
   media:
