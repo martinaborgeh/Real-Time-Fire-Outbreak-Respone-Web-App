@@ -16,13 +16,13 @@ RUN npm run build
 
 
 
-# Copy and set the entrypoint script
-COPY ./entrypoint.dev.sh /entrypoint.sh
+# # Copy and set the entrypoint script
+# COPY ./entrypoint.dev.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh
+# RUN chmod +x /entrypoint.sh
 
-# Set the entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+# # Set the entrypoint
+# ENTRYPOINT ["/entrypoint.sh"]
 
 
 

@@ -1,0 +1,16 @@
+./django_dockerfile/Dockerfile.prod
+./entrypoint.prod.sh
+fire_env
+./.gitinore
+./django_dockerfile/Dockerfile.prod
+./entrypoint.prod.sh
+fire_env
+./.gitinore
+./django_dockerfile/Dockerfile.prod
+./entrypoint.prod.sh
+fire_env
+./.gitinore
+./django_dockerfile/Dockerfile.prod
+./entrypoint.prod.sh
+fire_env
+./.gitinore

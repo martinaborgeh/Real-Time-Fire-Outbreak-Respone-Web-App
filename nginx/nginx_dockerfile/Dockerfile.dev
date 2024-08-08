@@ -1,6 +1,8 @@
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
 
-
+ENV REACT_APP_HOST_IP_ADDRESS http://127.0.0.1:80
+ENV REACT_APP_SERVER_MODE development
 # Copy Nginx configuration file
 COPY ./nginx_config/nginx.dev.conf /etc/nginx/nginx.conf
+
