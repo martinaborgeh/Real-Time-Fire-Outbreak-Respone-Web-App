@@ -15,7 +15,6 @@ echo "./.gitinore" >> ./backend/.dockerignore
 echo "./nginx_config/nginx.dev.conf" >> ./nginx/.dockerignore
 echo "./nginx_dockerfile/Dockerfile.dev" >> ./nginx/.dockerignore
 
-echo "./public/env-config-dev.js" >> ./frontend/.dockerignore
 
 # Append frontend dev files to .dockerignore file
 echo "./react_dockerfile/Dockerfile.dev" >> ./frontend/.dockerignore

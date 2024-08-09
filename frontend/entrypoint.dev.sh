@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Recreate config file
-rm -rf ./public/env-config-dev.js
-touch ./public/env-config-dev.js
+rm -rf ./public/env-config.js
+touch ./public/env-config.js
 
 # Add assignment 
-echo "window._env_ = {" >> ./public/env-config-dev.js
+echo "window._env_ = {" >> ./public/env-config.js
 
 # Read each line in .env file
 # Each line represents key=value pairs
@@ -22,8 +22,8 @@ while IFS='=' read -r varname varvalue || [ -n "$varname" ]; do
     [ -z "$value" ] && value=$varvalue
     
     # Append configuration property to JS file
-    echo "  $varname: \"$value\"," >> ./public/env-config-dev.js
+    echo "  $varname: \"$value\"," >> ./public/env-config.js
   fi
 done < .env.dev
 
-echo "}" >> ./public/env-config-dev.js
+echo "}" >> ./public/env-config.js
