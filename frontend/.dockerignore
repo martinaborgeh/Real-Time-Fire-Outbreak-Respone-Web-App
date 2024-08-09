@@ -1,3 +1,5 @@
+./nginx_config/nginx.prod.conf
+./nginx_dockerfile/Dockerfile.prod
 ./react_dockerfile/Dockerfile.prod
 ./nginx/nginx.prod.conf
 ./entrypoint.prod.sh

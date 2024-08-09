@@ -3,7 +3,7 @@
 # Clear the .dockerignore files
 truncate -s 0 ./backend/.dockerignore 
 truncate -s 0 ./frontend/.dockerignore
-truncate -s 0 ./nginx/.dockerignore
+# truncate -s 0 ./nginx/.dockerignore
  
 
 # Copy backend prod files into .dockerignore file
@@ -13,8 +13,8 @@ echo "fire_env" >> ./backend/.dockerignore
 echo "./.gitinore" >> ./backend/.dockerignore
 
 #Copy nginx prod files in .dockerignore
-echo "./nginx_config/nginx.prod.conf" >> ./nginx/.dockerignore
-echo "./nginx_dockerfile/Dockerfile.prod" >> ./nginx/.dockerignore
+echo "./nginx_config/nginx.prod.conf" >> ./frontend/.dockerignore
+echo "./nginx_dockerfile/Dockerfile.prod" >> ./frontend/.dockerignore
 
 
 # Copy frontend prod files into .dockerignore file

@@ -28,19 +28,19 @@ services:
     depends_on:
       - db
 
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: ./nginx_dockerfile/Dockerfile.dev
-    volumes:
-      - staticfiles:/app/fire_outbreak_project/fire_outbreak_project/staticfiles
-      - media:/app/fire_outbreak_project/fire_outbreak_project/media
-      - react_build:/usr/share/nginx/html
-    ports:
-      - 80:80
-    restart: unless-stopped
-    env_file:
-      - ./frontend/.env.dev
+  # nginx:
+  #   build:
+  #     context: ./nginx
+  #     dockerfile: ./nginx_dockerfile/Dockerfile.dev
+  #   volumes:
+  #     - staticfiles:/app/fire_outbreak_project/fire_outbreak_project/staticfiles
+  #     - media:/app/fire_outbreak_project/fire_outbreak_project/media
+  #     - react_build:/usr/share/nginx/html
+  #   ports:
+  #     - 80:80
+  #   restart: unless-stopped
+  #   # env_file:
+    #   - ./frontend/.env.dev
 
 
   frontend:
@@ -48,9 +48,14 @@ services:
       context: ./frontend
       dockerfile: ./react_dockerfile/Dockerfile.dev
     volumes:
-      - react_build:/app/build
+      - media:/app/fire_outbreak_project/fire_outbreak_project/media
+      - staticfiles:/app/fire_outbreak_project/fire_outbreak_project/staticfiles
+      # - react_build:/app/build
     depends_on:
       - backend
+    ports:
+      - "80:80"
+    
     # restart: 'no'
 
   redis:
@@ -64,4 +69,4 @@ volumes:
   staticfiles:
   media:
   posgresdata:
-  react_build:
+  # react_build:

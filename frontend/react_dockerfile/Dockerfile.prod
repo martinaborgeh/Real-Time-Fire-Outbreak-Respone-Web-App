@@ -14,14 +14,24 @@ COPY . /app/
 # Build the React application
 RUN npm run build
 
+# Stage 2: Serve with Nginx
+FROM nginx:alpine
 
 
-# # Copy and set the entrypoint script
-COPY ./entrypoint.prod.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Copy Nginx configuration file
+COPY ./nginx_config/nginx.prod.conf /etc/nginx/nginx.conf
 
-# Set the entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+COPY --from=build /app/build /usr/share/nginx/html/
+
+
+
+
+# # # Copy and set the entrypoint script
+# COPY ./entrypoint.prod.sh /entrypoint.sh
+# RUN chmod +x /entrypoint.sh
+
+# # Set the entrypoint
+# ENTRYPOINT ["/entrypoint.sh"]
 
 
 
