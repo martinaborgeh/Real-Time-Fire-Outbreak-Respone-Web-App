@@ -30,6 +30,9 @@ services:
     depends_on:
       - frontend
     restart: unless-stopped
+    env_file:
+      - ./frontend/.env.dev
+
   
 
 
