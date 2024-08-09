@@ -24,6 +24,8 @@ echo "./entrypoint.prod.sh" >> ./frontend/.dockerignore
 echo "node_modules" >> ./frontend/.dockerignore
 echo "./.gitinore" >> ./frontend/.dockerignore
 
+echo "./public/env-config-prod.js" >> ./frontend/.dockerignore
+
 
 # Stop the dev container and rebuild using production configuration
 docker-compose -f docker-compose.dev.yml down

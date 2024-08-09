@@ -2,7 +2,7 @@ import axios from 'axios';
 import { bounds } from 'leaflet';
 
 import  backendBaseurl from "../../dev_prod_config"
-const backend_server_url = backendBaseurl(process.env.REACT_APP_SERVER_MODE)
+const backend_server_url = backendBaseurl(window._env_.REACT_APP_SERVER_MODE)
 
 // import osmtogeojson from 'osmtogeojson';
 
