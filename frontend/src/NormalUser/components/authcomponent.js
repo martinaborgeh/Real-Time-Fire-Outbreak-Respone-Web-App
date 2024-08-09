@@ -102,7 +102,7 @@ export function SubmitNewNormalUserDetails(){
     <div class="bg-[#dfa674] rounded-2xl flex max-w-3xl p-5 items-center">
         <div class="md:w-1/2 px-8">
             <h2 class="font-bold text-3xl text-[#002D74]">Sign Up</h2>
-            <p>API_URL: {window._env_.API_URL}</p>
+            <p>API_URL: {window._env_.REACT_APP_BACKEND_DEV_APP_API_URL}</p>
             <p class="text-sm mt-4 text-[#002D74]">If dont have an acount, easily sign up now.</p>
 
             <form action="" onSubmit={handleSubmit} class="flex flex-col gap-4">
