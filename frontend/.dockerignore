@@ -1,5 +1,0 @@
-./react_dockerfile/Dockerfile.prod
-./nginx/nginx.prod.conf
-./entrypoint.prod.sh
-node_modules
-./.gitinore

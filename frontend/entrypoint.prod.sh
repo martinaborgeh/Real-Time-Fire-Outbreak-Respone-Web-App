@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#Change directory to frontend
+cd ./frontend
+
 # Recreate config file
 rm -rf ./public/env-config.js
 touch ./public/env-config.js
@@ -27,3 +30,6 @@ while IFS='=' read -r varname varvalue || [ -n "$varname" ]; do
 done < .env.prod
 
 echo "}" >> ./public/env-config.js
+
+#Change directory backwards
+cd ../

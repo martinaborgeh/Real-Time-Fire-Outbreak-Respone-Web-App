@@ -1,7 +1,0 @@
-# Stage 2: Serve with Nginx
-FROM nginx:alpine
-
-
-# Copy Nginx configuration file
-COPY ./nginx_config/nginx.prod.conf /etc/nginx/nginx.conf
-
