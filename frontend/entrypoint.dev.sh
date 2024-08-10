@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#Change directory to frontend
-cd ./frontend
 
 # Recreate config file
 rm -rf ./public/env-config.js
@@ -31,5 +29,4 @@ done < .env.dev
 
 echo "}" >> ./public/env-config.js
 
-#Change directory backwards
-cd ../
+
