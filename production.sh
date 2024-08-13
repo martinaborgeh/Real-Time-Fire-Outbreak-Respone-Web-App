@@ -3,7 +3,7 @@
 # Clear the .dockerignore files
 truncate -s 0 ./backend/.dockerignore 
 truncate -s 0 ./frontend/.dockerignore 
-truncate -s 0 ./nginx/.dockerignore
+# truncate -s 0 ./nginx/.dockerignore
 
 # Append backend dev files to .dockerignore file
 echo "./django_dockerfile/Dockerfile.dev" >> ./backend/.dockerignore

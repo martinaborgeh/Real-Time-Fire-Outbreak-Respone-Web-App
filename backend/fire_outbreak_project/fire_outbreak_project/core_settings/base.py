@@ -96,7 +96,7 @@ TEMPLATES = [
 
 
 
-WSGI_APPLICATION = 'fire_outbreak_project.wsgi.application'
+# WSGI_APPLICATION = 'fire_outbreak_project.wsgi.application'
 ASGI_APPLICATION = "fire_outbreak_project.asgi.application"
 
 
