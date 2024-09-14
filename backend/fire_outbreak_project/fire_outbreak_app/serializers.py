@@ -2,6 +2,7 @@
 #Third-party modules
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from uuid import uuid4
 
 
 
@@ -12,7 +13,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.geos import LineString
 
 #Custom-created modules
-from .models import FireHydrants,FireStations,FireIncident,Roads
+from .models import FireHydrants,FireStations,FireIncident,Roads,Room
 
 
 
@@ -33,6 +34,7 @@ class PointFieldSerializer(serializers.Field):
             raise serializers.ValidationError("Longitude and latitude are required fields.")
 
 class AddFireServiceStationsSerializer(serializers.ModelSerializer):
+    user = serializers.IntegerField(source='user.id', required=False)
     emergency_phone_number= serializers.IntegerField(required=False, validators=[MinValueValidator(0)])
     region = serializers.CharField(required = False)
     district = serializers.CharField(required = False)
@@ -50,7 +52,8 @@ class AddFireServiceStationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FireStations
         fields = [
-            'id', 
+            'id',
+            'user' 
             'region', 
             'district', 
             'location',
@@ -195,4 +198,31 @@ class RoadsSerializer(GeoFeatureModelSerializer):
             raise serializers.ValidationError("The geometry field must be a valid LineString.")
         return value
     
+class RoomSerializer(serializers.ModelSerializer):
 
+    """
+    Room Serialiser
+    """
+
+    room_id = serializers.SerializerMethodField()
+    created_on = serializers.DateTimeField(
+        format="%a %I:%M %p, %d %b %Y", required=False
+    )
+
+    class Meta:
+        model = Room
+        fields = [
+            "id",
+            "user",
+            "title",
+            "description",
+            "type_of",
+            "created_on",
+            "room_id",
+        ]
+
+    # Generate room id
+    def get_room_id(self, obj):
+        if obj.type_of == "IO":
+            return "room" + str(uuid4().hex)
+        return "room" + str(obj.id)

@@ -2,6 +2,7 @@
 # Django modules.
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
+from ..account.models import CustomUserModel
 
 
 # This class requires that you download data from openstreetmap and store as geojson
@@ -51,6 +52,7 @@ class FireHydrants(models.Model):
         return f"{self.location}"
 
 class FireStations(models.Model):
+    user = models.OneToOneField(CustomUserModel, on_delete=models.CASCADE)
     region = models.CharField(max_length= 100, verbose_name = "Region",null= True, blank=True) 
     district = models.CharField(max_length= 100, verbose_name = "District",null= True, blank=True)
     emergency_phone_number= models.PositiveIntegerField(verbose_name = "Emergency Phone Number",null= True, blank=True)
@@ -88,6 +90,29 @@ class FireIncident(models.Model):
     def __str__(self):
         return f"{self.location}"
     
+
+class Room(models.Model):
+
+    """
+    Room Model for group calling
+    """
+
+    ROOM_TYPE = [
+        ("OTA", "Open to all"),
+        ("IO", "Invite only"),
+    ]
+    user = models.ForeignKey(CustomUserModel, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    description = models.TextField(default="")
+    type_of = models.CharField(
+        max_length=3,
+        choices=ROOM_TYPE,
+        default="OTA",
+    )
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
 
     
         

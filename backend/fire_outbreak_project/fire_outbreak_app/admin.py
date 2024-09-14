@@ -8,7 +8,7 @@ from django.contrib import admin
 
 
 #Custom-created modules
-from .models import FireHydrants,FireStations,FireIncident,Roads
+from .models import FireHydrants,FireStations,FireIncident,Roads,Room
 from .serializers import AddFireServiceStationsSerializer,AddFireHydrantSerializer,AddFireIncidentSerializer,RoadsSerializer
 from .import_resources import FireHydrantResource,FireIncidentResource,FireStationResource
 
@@ -59,7 +59,7 @@ class RoadsAdmin(LeafletGeoAdmin):
     leaflet_config = leaflet_config
     class Meta:
         model = Roads
-        
-
 admin.site.register(Roads, RoadsAdmin)
+
+admin.site.register(Room)
     

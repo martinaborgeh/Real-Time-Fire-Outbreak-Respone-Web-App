@@ -28,6 +28,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         if user.role == "Normal User":
             token = super(MyTokenObtainPairSerializer, cls).get_token(user)
             token["email"] = user.email
+            token["full_name"] = user.full_name
             
         
             return token

@@ -15,6 +15,7 @@ from datetime import timedelta
 
 
 
+
 from django.contrib.auth import authenticate,login,logout
 from django.http import Http404
 from django.utils import timezone
@@ -34,6 +35,7 @@ from .view_helper_functions import (
     )
 
 from account.custom_jwt_auth import CustomJWTAuthentication
+from account.adminrolebanckendauthenticate import RoleBasedBackend
 #Receive new normal user details, store in session to be verified and later send code to the Normal user
 class SendNewUserVerificationCode(APIView):
 
@@ -191,14 +193,62 @@ class MyObtainTokenPairView(TokenObtainPairView):
 
 
 
+# class CheckIfUserIsAuthenticated(APIView):
+#     authentication_classes = [CustomJWTAuthentication]
+#     def get(self, request,*args, **kwargs):
+#         try:     # Your view logic here
+#             return Response({"message": "Your response"}, status=status.HTTP_200_OK)
+#         except AuthenticationFailed as e:
+#             print("error",e)
+#             return Response({"message": "Unauthorized","error":e}, status=status.HTTP_401_UNAUTHORIZED)
+
 class CheckIfUserIsAuthenticated(APIView):
     authentication_classes = [CustomJWTAuthentication]
-    def get(self, request,*args, **kwargs):
-        try:     # Your view logic here
-            return Response({"message": "Your response"}, status=status.HTTP_200_OK)
+    
+    def get(self, request, *args, **kwargs):
+        try:
+            # Attempt primary authentication
+            self.authenticate(request)
+            return self._generate_response(request.user)
         except AuthenticationFailed as e:
-            print("error",e)
-            return Response({"message": "Unauthorized","error":e}, status=status.HTTP_401_UNAUTHORIZED)
+            print("Primary authentication failed:", e)
+            
+            # Attempt fallback authentication
+            try:
+                # Temporarily switch authentication class to fallback
+                request._authenticator = RoleBasedBackend()
+                self.authenticate(request)
+                return self._generate_response(request.user)
+            except AuthenticationFailed as e:
+                print("Fallback authentication failed:", e)
+                return Response({"message": "Unauthorized", "error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def authenticate(self, request):
+        """
+        Authenticate the request using the provided authentication classes.
+        """
+        for backend in self.authentication_classes:
+            try:
+                user_auth_tuple = backend().authenticate(request)
+                if user_auth_tuple is not None:
+                    request.user, request.auth = user_auth_tuple
+                    return user_auth_tuple
+            except AuthenticationFailed:
+                continue
+        return None
+    
+    def _generate_response(self, user):
+        """
+        Generate a response with user details.
+        """
+        if user.is_authenticated:
+            return Response({
+                "message": "Authentication successful",
+                "full_name": f"{user.full_name}",
+                "user_id": user.id
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 

@@ -2,22 +2,34 @@
 # from rest_framework.views import APIView
 from adrf.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAdminUser,IsAuthenticatedOrReadOnly
+from rest_framework import status,viewsets
+from rest_framework.permissions import IsAdminUser,AllowAny,IsAuthenticatedOrReadOnly
 
 
 #Django Modules
-from django.shortcuts import render
+
 from django.http import Http404
 from django.contrib.gis.geos import Point
-from django.contrib.gis.db.models.functions import Distance
-from django.contrib.gis.measure import Distance as DistanceMeasure
-from django.http import JsonResponse
-
+from django.shortcuts import get_object_or_404
 
 #Custom Defined Modules
-from . models import FireHydrants,FireStations,FireIncident,Roads
-from .serializers import AddFireServiceStationsSerializer,AddFireHydrantSerializer,AddFireIncidentSerializer,RoadsSerializer
+from . models import (
+    FireHydrants,
+    FireStations,
+    FireIncident,
+    Roads,
+    Room
+  )
+from..account.custom_jwt_auth import CustomJWTAuthentication
+
+from .serializers import (
+    AddFireServiceStationsSerializer,
+    AddFireHydrantSerializer,
+    AddFireIncidentSerializer,
+    RoadsSerializer,
+    RoomSerializer
+   )
+
 from account.permissions import IsOwnerOrReadOnly
 from .view_helper_functions import (
     fetch_road_data_from_db,
@@ -254,3 +266,55 @@ class SearchBestOptimalPath(APIView):
 
         #Return Response Object to Clientsssssssssssss
         return Response(response_data, status=status.HTTP_200_OK)
+    
+class RoomViewSet(viewsets.ModelViewSet):
+    """
+    Rooms View
+    """
+
+    queryset = Room.objects.all().order_by("-created_on")
+    serializer_class = RoomSerializer
+
+    def get_queryset(self):
+
+        # By default list of rooms return
+        queryset = Room.objects.all().order_by("-created_on")
+
+        # If search params is given then list matching the param is returned
+        search = self.request.query_params.get("search", None)
+        if search is not None:
+            queryset = Room.objects.filter(title__icontains=search).order_by(
+                "-created_on"
+            )
+        return queryset
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action == "list" or self.action == "retrieve":
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticatedOrReadOnly]
+        return [permission() for permission in permission_classes]
+
+    def destroy(self, request, pk=None):
+
+        """
+        Checks whether user requesting a delete of the room is the owner of the room or not
+        """
+        room = get_object_or_404(Room, id=pk)
+
+        if room:
+            authenticate_class =  CustomJWTAuthentication()
+            user, _ = authenticate_class.authenticate(request)
+            if user.id == room.user.id:
+                room.delete()
+            else:
+                return Response(
+                    {
+                        "message": "Either you are not logged in or you are not the owner of this room to delete"
+                    },
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+        return Response({}, status=status.HTTP_204_NO_CONTENT)

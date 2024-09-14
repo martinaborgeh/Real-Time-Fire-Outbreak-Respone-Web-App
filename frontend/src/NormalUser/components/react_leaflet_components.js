@@ -266,8 +266,14 @@ export const UpdateDataComponent = memo(({maxBounds, currentPosition}) => {
   const fireHydrantStationsGeoJsonLayer = useRef(null);
   const fireStationsGeoJsonLayer = useRef(null)
 
-  const map = useMap()
+  const navigate =  useNavigate ()
 
+  const map = useMap()
+  
+  function handleStartVideo(Admin_id){
+    localStorage.setItem("admin_id",Admin_id)
+    navigate("/call-view")
+  }
 
   const generateCacheKey = (bounds, currentPosition) => {
     return JSON.stringify({ bounds, currentPosition });
@@ -408,7 +414,7 @@ export const UpdateDataComponent = memo(({maxBounds, currentPosition}) => {
             <strong>Number of Portable Pumps:</strong> ${feature.properties.number_of_portable_pumb}<br/>
             <strong>Number of Recovery Tracks:</strong> ${feature.properties.number_of_recovery_track}<br/>
             <strong>Number of Water Tankers:</strong> ${feature.properties.number_of_water_tanker}<br/>
-            <button style = "margin-left:40px;margin-top:10px;font-weight: 300;color:white;width:120px;padding-top: 0.4rem;border-radius: 0.75rem;padding-left:0.3rem;padding-right:0.3rem;padding-bottom: 0.4rem;background-color:#002D74">Start Video Call</button>
+            <button onclick  = "handleStartVideo('${feature.properties.user_id}')" style = "margin-left:40px;margin-top:10px;font-weight: 300;color:white;width:120px;padding-top: 0.4rem;border-radius: 0.75rem;padding-left:0.3rem;padding-right:0.3rem;padding-bottom: 0.4rem;background-color:#002D74">Start Video Call</button>
           </div>
         `);
         return marker;

@@ -4,6 +4,7 @@ from .models import CustomUserModel
 
 
 
+
 class RoleBasedBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         print(request.POST)  # Assuming username is the email
@@ -16,6 +17,9 @@ class RoleBasedBackend(ModelBackend):
             # Check if the user's role and email meet certain criteria for authentication
             if user.role == "SuperUser Admins":
                 if user.check_password(password):
+                    request.session['username'] = username
+                    request.session['password'] = password
+                    request.session.save()
                     return user
             elif user.role == "Other Admins":
                 if user.check_password(password):
@@ -31,3 +35,6 @@ class RoleBasedBackend(ModelBackend):
             return CustomUserModel.objects.get(id=user_id)
         except CustomUserModel.DoesNotExist:
             return None
+        
+
+

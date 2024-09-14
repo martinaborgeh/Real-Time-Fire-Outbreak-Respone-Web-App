@@ -141,6 +141,7 @@ def format_points_as_geojson(points):
     features = []
     for point in points:
         properties = {
+            'user_id': point.user.id if hasattr(point, 'user') and point.user else None,  # Add user ID
             'region': point.region if hasattr(point, 'region') else None,
             'district': point.district if hasattr(point, 'district') else None,
             'emergency_phone_number': point.emergency_phone_number if hasattr(point, 'emergency_phone_number') else None,

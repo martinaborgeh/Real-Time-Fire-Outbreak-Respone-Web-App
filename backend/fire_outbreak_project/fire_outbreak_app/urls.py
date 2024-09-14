@@ -1,6 +1,8 @@
 from django.urls import path
 from django.views.decorators.cache import cache_page
 
+from rest_framework import routers
+
 from .views import (
 
 CreateOrListFireService,
@@ -10,10 +12,16 @@ CreateOrListFireIncident,
 GetOneOrUpdateOneFireService,
 GetOneOrUpdateOneFireHydrant,
 GetOneOrUpdateOneFireIncident,
-SearchBestOptimalPath
+SearchBestOptimalPath,
+RoomViewSet
 
 )
-urlpatterns = [
+
+router = routers.DefaultRouter()
+router.register(r"rooms", RoomViewSet)
+urlpatterns = router.urls
+
+urlpatterns += [
    
     # Create or List data
     path("search-best-optimal-path/",SearchBestOptimalPath.as_view(), name="search-best-optimal-path"),
