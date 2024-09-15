@@ -20,7 +20,7 @@ from . models import (
     Roads,
     Room
   )
-from..account.custom_jwt_auth import CustomJWTAuthentication
+from account.custom_jwt_auth import CustomJWTAuthentication
 
 from .serializers import (
     AddFireServiceStationsSerializer,

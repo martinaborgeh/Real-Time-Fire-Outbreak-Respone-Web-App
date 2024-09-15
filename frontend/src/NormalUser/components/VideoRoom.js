@@ -665,11 +665,11 @@
 // NormalUser.js
 
 import React, { useState, useEffect } from 'react';
-import jwtDecode from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 import backendBaseurl from "../../dev_prod_config";
 const backend_server_url = backendBaseurl(window._env_.REACT_APP_SERVER_MODE);
 
-ICE_SERVERS= [
+const ICE_SERVERS= [
   {
     urls: "stun:stun.relay.metered.ca:80",
   },

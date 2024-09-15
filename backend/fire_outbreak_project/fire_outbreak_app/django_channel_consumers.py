@@ -736,7 +736,7 @@
 #         user = self.find_user(user_id)
 #         return user["role"] if user else None
 
-
+import os
 import json
 import redis
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -744,9 +744,9 @@ from django.conf import settings
 
 # Create a Redis client
 redis_client = redis.StrictRedis(
-    host=settings.REDIS_HOST, 
-    port=settings.REDIS_PORT, 
-    db=settings.REDIS_DB
+    host=os.environ.get("CHANNEL_HOST"), 
+    port=os.environ.get("CHANNEL_PORT"), 
+    # db=settings.REDIS_DB
 )
 
 class VideoConsumer(AsyncWebsocketConsumer):

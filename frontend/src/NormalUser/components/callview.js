@@ -37,11 +37,7 @@ export function NormalUserCallView() {
       });
 
     // Cleanup function to close WebSocket connection on unmount
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-    };
+    
   }, [navigate]);
 
   const admin_id = localStorage.getItem("admin_id")
