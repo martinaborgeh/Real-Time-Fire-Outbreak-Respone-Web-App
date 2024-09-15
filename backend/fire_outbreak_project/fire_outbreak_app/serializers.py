@@ -34,7 +34,7 @@ class PointFieldSerializer(serializers.Field):
             raise serializers.ValidationError("Longitude and latitude are required fields.")
 
 class AddFireServiceStationsSerializer(serializers.ModelSerializer):
-    user = serializers.IntegerField(source='user.id', required=False)
+    user = serializers.IntegerField(source='user', required=False)
     emergency_phone_number= serializers.IntegerField(required=False, validators=[MinValueValidator(0)])
     region = serializers.CharField(required = False)
     district = serializers.CharField(required = False)

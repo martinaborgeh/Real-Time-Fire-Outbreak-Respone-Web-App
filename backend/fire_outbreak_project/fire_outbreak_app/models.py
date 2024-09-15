@@ -52,7 +52,7 @@ class FireHydrants(models.Model):
         return f"{self.location}"
 
 class FireStations(models.Model):
-    user = models.OneToOneField(CustomUserModel,default = 0, on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUserModel, on_delete=models.CASCADE,blank=True,null=True)
     region = models.CharField(max_length= 100, verbose_name = "Region",null= True, blank=True) 
     district = models.CharField(max_length= 100, verbose_name = "District",null= True, blank=True)
     emergency_phone_number= models.PositiveIntegerField(verbose_name = "Emergency Phone Number",null= True, blank=True)
