@@ -35,7 +35,7 @@ roads_mapping = {
     'tunnel': 'tunnel',
     'geom': 'LINESTRING',
 }
-road_shp = Path(__file__).resolve().parent / "road_data" / "ghana_osm_road_free_updated.shp"
+road_shp = Path(__file__).resolve().parent / "road_data" / "ghana_osm_road_free_updated_new.shp"
 
 
 
