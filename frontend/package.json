@@ -18,21 +18,21 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "choose-platform": "node choose-platform.js",
     "tailwind:build": "tailwindcss -i src/index.css -o src/style.css",
     "tailwind:watch": "tailwindcss -i src/index.css -o src/style.css --watch",
-    "start-js": "react-scripts --openssl-legacy-provider start",
-    "build-js": "react-scripts --openssl-legacy-provider build",
-    "start": "npm-run-all -p tailwind:watch start-js",
-    "build": "npm-run-all tailwind:build build-js",
+    "start-virtual-js": "WATCHPACK_POLLING=true react-scripts start",
+    "build-virtual-js": "WATCHPACK_POLLING=true react-scripts build",
+    "start-native-js": "react-scripts start",
+    "build-native-js": "react-scripts build",
+    "start": "npm run choose-platform && node -e \"const commands = require('./.platform-commands.json'); require('child_process').execSync(commands.start, { stdio: 'inherit' });\"",
+    "build": "npm run choose-platform && node -e \"const commands = require('./.platform-commands.json'); require('child_process').execSync(commands.build, { stdio: 'inherit' });\"",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
+  }
+  
+  
+  ,
   "browserslist": {
     "production": [
       ">0.2%",

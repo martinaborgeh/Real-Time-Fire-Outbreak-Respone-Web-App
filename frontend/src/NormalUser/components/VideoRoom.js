@@ -695,6 +695,7 @@ const ICE_SERVERS= [
   },
 ]
 
+
 const NormalUserCallVideoRoom = ({ navigate,admin_id }) => {
   const [websocket, setWebsocket] = useState(null);
   const [stream, setStream] = useState(null);
@@ -704,9 +705,11 @@ const NormalUserCallVideoRoom = ({ navigate,admin_id }) => {
   const [isVideoRoomAccessible, setIsVideoRoomAccessible] = useState(true);
   const [isReconnecting, setIsReconnecting] = useState(false);
   const token = localStorage.getItem('access');
-
-  const decoded_token = token ? jwtDecode(token) : navigate("/login");
-  const { userId, full_name } = token ? [decoded_token.user._id, decoded_token.full_name] : navigate("/login");
+  // const decoded_token = token ? jwtDecode(token) : navigate("/login");
+  const decoded_token = token ? jwtDecode(token) : null;
+  const userDetails = token ? [decoded_token.user._id, decoded_token.full_name]:null
+  const userId  = userDetails!==null?userDetails[0]:console.log("User is not logged in")
+  const full_name  = userDetails!==null ? userDetails[1]:console.log("User is not logged in")
 
   const printFeedback = ({ type, feedbackMsg }) => {
     if (type === 'error') {
@@ -745,7 +748,6 @@ const NormalUserCallVideoRoom = ({ navigate,admin_id }) => {
 
     return peerConnection;
   };
-
   const handleCandidate = async (candidate) => {
     const peerConnection = peers['admin'];
     if (peerConnection) {

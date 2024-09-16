@@ -11,3 +11,4 @@ backend/fire_outbreak_project/fire_outbreak_app/road_data/ghana_osm_road_free_up
 backend/fire_outbreak_project/fire_outbreak_app/road_data/ghana_osm_road_free_updated_new.qmd
 backend/fire_outbreak_project/fire_outbreak_app/road_data/ghana_osm_road_free_updated_new.shp
 backend/fire_outbreak_project/fire_outbreak_app/road_data/ghana_osm_road_free_updated_new.shx
+frontend/.platform-commands.json

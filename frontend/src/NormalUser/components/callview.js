@@ -37,7 +37,7 @@ export function NormalUserCallView() {
       });
 
     // Cleanup function to close WebSocket connection on unmount
-    
+
   }, [navigate]);
 
   const admin_id = localStorage.getItem("admin_id")
@@ -48,5 +48,5 @@ export function NormalUserCallView() {
       <NormalUserCallVideoRoom navigate = {navigate}  admin_id = {admin_id} />
       </div>
     </div>
-  );
-}
+  )
+  }

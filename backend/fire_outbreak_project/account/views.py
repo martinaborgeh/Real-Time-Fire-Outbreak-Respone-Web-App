@@ -209,7 +209,7 @@ class CheckIfUserIsAuthenticated(APIView):
         try:
             # Attempt primary authentication
             self.authenticate(request)
-            return self._generate_response(request.user)
+            return self._generate_response({request.user})
         except AuthenticationFailed as e:
             print("Primary authentication failed:", e)
             
