@@ -42,6 +42,7 @@ export function AdminUserLogin(){
 
                     if (!response_data.ok){
                             if(response_data.status ===401){
+                              console.log("The eror",response_data.error)
                                 console.log("Not Authorized, Enter Valid Inout")
                             }else if (response_data.status === 400){
                                 console.log("Something Bad Happened, We would resolve it soon")
@@ -50,7 +51,7 @@ export function AdminUserLogin(){
                     }else if (response_data.ok) {
                         console.log(response_data.status)
                         // console.log("refresh",response_data.refresh)
-                        navigate("/admin-homepage"); 
+                        navigate("/admin-call-view"); 
                     //    return response_data.json()
                     }
                 })

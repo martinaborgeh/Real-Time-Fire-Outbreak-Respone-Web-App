@@ -695,8 +695,8 @@ const ICE_SERVERS= [
   },
 ]
 
-
-const NormalUserCallVideoRoom = ({ navigate,admin_id }) => {
+ 
+const NormalUserCallVideoRoom = ({ navigate,admin_id,userDetails }) => {
   const [websocket, setWebsocket] = useState(null);
   const [stream, setStream] = useState(null);
   const [peers, setPeers] = useState({});
@@ -706,10 +706,7 @@ const NormalUserCallVideoRoom = ({ navigate,admin_id }) => {
   const [isReconnecting, setIsReconnecting] = useState(false);
   const token = localStorage.getItem('access');
   // const decoded_token = token ? jwtDecode(token) : navigate("/login");
-  const decoded_token = token ? jwtDecode(token) : null;
-  const userDetails = token ? [decoded_token.user._id, decoded_token.full_name]:null
-  const userId  = userDetails!==null?userDetails[0]:console.log("User is not logged in")
-  const full_name  = userDetails!==null ? userDetails[1]:console.log("User is not logged in")
+  const {userId, full_name} = userDetails
 
   const printFeedback = ({ type, feedbackMsg }) => {
     if (type === 'error') {

@@ -21,6 +21,7 @@ export function SubmitNewNormalUserDetails(){
     const navigate =  useNavigate ()
     
     const serverbaseurl = backend_server_url
+    console.log(serverbaseurl)
 
     const SignUpData ={
         full_name,

@@ -20,6 +20,7 @@ class RoleBasedBackend(ModelBackend):
                     request.session['username'] = username
                     request.session['password'] = password
                     request.session.save()
+                    print("role auth used",user)
                     return user
             elif user.role == "Other Admins":
                 if user.check_password(password):
@@ -35,6 +36,7 @@ class RoleBasedBackend(ModelBackend):
             return CustomUserModel.objects.get(id=user_id)
         except CustomUserModel.DoesNotExist:
             return None
-        
+
+
 
 

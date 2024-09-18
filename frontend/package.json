@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "css-loader": "^7.1.2",
     "env-cmd": "^10.1.0",
+    "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "postcss-loader": "^8.1.1",
     "react": "^18.2.0",
@@ -29,10 +30,7 @@
     "build": "npm run choose-platform && node -e \"const commands = require('./.platform-commands.json'); require('child_process').execSync(commands.build, { stdio: 'inherit' });\"",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  }
-  
-  
-  ,
+  },
   "browserslist": {
     "production": [
       ">0.2%",

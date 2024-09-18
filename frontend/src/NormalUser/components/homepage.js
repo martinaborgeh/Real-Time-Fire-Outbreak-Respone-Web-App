@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link,useNavigate} from 'react-router-dom';
+import Cookies from 'js-cookie';
+
+import  backendBaseurl from "../../dev_prod_config"
+const backend_server_url = backendBaseurl(window._env_.REACT_APP_SERVER_MODE)
 
 export function HomepageView() {
-    const serverbaseurl = "http://localhost:8000";
+    const serverbaseurl = backend_server_url;
+    console.log("serverurl",serverbaseurl)
 
     const navigate =  useNavigate ()
 
@@ -11,7 +16,9 @@ export function HomepageView() {
           method: 'GET',
           credentials: 'include',
           headers: {
+            "ngrok-skip-browser-warning":true,
             "Content-Type": "application/json",
+            
           },
         })
           .then(response_data => {
@@ -22,7 +29,9 @@ export function HomepageView() {
                 console.log("Something Bad Happened, We would resolve it soon");
                 navigate("/error-message");
               }
-            } else {
+            } else if (response_data.ok) {
+              console.log(response_data.full_name)
+              
               return response_data.json();
             }
           })

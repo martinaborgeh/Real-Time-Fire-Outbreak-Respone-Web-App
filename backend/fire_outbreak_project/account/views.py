@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from datetime import timedelta
-
+from rest_framework.permissions import IsAuthenticated
 
 
 
@@ -70,10 +70,11 @@ class SendNewUserVerificationCode(APIView):
                 code = generate_verification_code()
                 validated_data['Code'] = code
                 validated_data['code_verification_timeout'] = timezone.now() + timedelta(minutes=20)
+               
                 save_in_session(request, validated_data)
-                print("session data",request.session.get('unverified_details', 'Session item not found'))
+                # print("session data",request.session.get('unverified_details', 'Session item not found'))
             
-                send_email_verification_code(email,code)
+                # send_email_verification_code(email,code)
                 return Response({'message': 'Email sent successfully'}, status=status.HTTP_200_OK)
             else:
                errors = self.get_formatted_errors(serializer.errors)
@@ -87,9 +88,13 @@ class SendNewUserVerificationCode(APIView):
 class Check_If_Code_Verification_Expired(APIView):
     def post(self, request):
         session_data = request.session.get('unverified_details')
+        print("my session data",session_data)
         session_email = session_data.get('email')if session_data else None
         client_email = request.data.get('verify_email')
         is_code_verify_timeout = check_code_verification_timeout(session_data)
+        print(is_code_verify_timeout)
+        print(client_email)
+        print(session_email)
         if is_code_verify_timeout and client_email !=session_email:
             return Response({'message': 'Verification Code Expired'}, status=status.HTTP_200_OK)
         else:
@@ -193,63 +198,76 @@ class MyObtainTokenPairView(TokenObtainPairView):
 
 
 
+
+
 # class CheckIfUserIsAuthenticated(APIView):
+#     """
+#     A view that checks if the user is authenticated.
+#     """
+
 #     authentication_classes = [CustomJWTAuthentication]
-#     def get(self, request,*args, **kwargs):
-#         try:     # Your view logic here
-#             return Response({"message": "Your response"}, status=status.HTTP_200_OK)
-#         except AuthenticationFailed as e:
-#             print("error",e)
-#             return Response({"message": "Unauthorized","error":e}, status=status.HTTP_401_UNAUTHORIZED)
+    
 
+#     def get(self, request):
+#         """
+#         Responds with the user's information if authenticated.
+#         """
+#         user = request.user
+        
+#         print("get",request.GET)
+
+#         print("this is the username",user)
+        
+#         return Response({
+#             'is_authenticated': True,
+#             'user': {
+#                 'id': user.id,
+#                 'email': user.full_name,
+#                 'role': user.role,
+#             }
+#         })
+
+#     def post(self, request):
+#         """
+#         Handle other authentication checks or any other logic as needed.
+#         """
+#         return Response({"detail": "Method not allowed"}, status=405)
+
+
+
+
+# class CheckIfUserIsAuthenticated(APIView):
+#     authentication_classes = [RoleBasedBackend,CustomJWTAuthentication]
+
+#     def get(self, request, *args, **kwargs):
+#         user = self.request.user
+#         print("The user is",user)
+#         if user and user.is_authenticated:
+#             return Response({"message": "User is authenticated", "user": str(user)}, status=status.HTTP_200_OK)
+#         else:
+#             return Response({"message": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+   
 class CheckIfUserIsAuthenticated(APIView):
-    authentication_classes = [CustomJWTAuthentication]
-    
-    def get(self, request, *args, **kwargs):
-        try:
-            # Attempt primary authentication
-            self.authenticate(request)
-            return self._generate_response({request.user})
-        except AuthenticationFailed as e:
-            print("Primary authentication failed:", e)
-            
-            # Attempt fallback authentication
-            try:
-                # Temporarily switch authentication class to fallback
-                request._authenticator = RoleBasedBackend()
-                self.authenticate(request)
-                return self._generate_response(request.user)
-            except AuthenticationFailed as e:
-                print("Fallback authentication failed:", e)
-                return Response({"message": "Unauthorized", "error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+    # authentication_classes = [CustomJWTAuthentication, RoleBasedBackend]
+    # permission_classes = [IsAuthenticated]
 
-    def authenticate(self, request):
-        """
-        Authenticate the request using the provided authentication classes.
-        """
-        for backend in self.authentication_classes:
-            try:
-                user_auth_tuple = backend().authenticate(request)
-                if user_auth_tuple is not None:
-                    request.user, request.auth = user_auth_tuple
-                    return user_auth_tuple
-            except AuthenticationFailed:
-                continue
-        return None
-    
-    def _generate_response(self, user):
-        """
-        Generate a response with user details.
-        """
-        if user.is_authenticated:
+    def get(self, request, *args, **kwargs):
+        # Check if the request.user is authenticated
+        user = request.user
+        print(request.headers)
+        print(f"Request user: {user}")
+
+        if user and user.is_authenticated:
+            # Return the user's ID and full name (assuming 'get_full_name' method exists in the model)
             return Response({
-                "message": "Authentication successful",
-                "full_name": f"{user.full_name}",
-                "user_id": user.id
+                "message": "User is authenticated",
+                "user_id": user.id,
+                "full_name": user.full_name()
             }, status=status.HTTP_200_OK)
         else:
+            # If user is not authenticated
             return Response({"message": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
-
 
 
 
@@ -281,34 +299,38 @@ class RegisterAdminUserView(generics.CreateAPIView):
             return Response({"errors": f"the error is {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)   
         
 
-class LoginAdminUser(APIView):
-     def post(self, request, *args, **kwargs):
 
+class LoginAdminUser(APIView):
+  
+
+    def post(self, request, *args, **kwargs):
         try:
             serializer = LoginSerializer(data=request.data)
             if serializer.is_valid():
                 email = serializer.validated_data['email']
                 password = serializer.validated_data['password']
-                role = serializer.validated_data['role']
-                print("role",role)
-
-                user = authenticate(request, email=email, password=password)
-                if user is not None:
                 
-                    if role =="SuperUser Admins" or role =="Other Admins":
-                        print("hello")
+                # Authenticate user using Django's authenticate function
+                user = authenticate(request, username=email, password=password)
+                if user is not None:
+                    role = getattr(user, 'role', None)
+                    if role in ["SuperUser Admins", "Other Admins"]:
                         login(request, user)
+                        print(f"User {user} logged in successfully")
                         return Response({"message": "Login successful."}, status=status.HTTP_200_OK)
-                    elif role =="Normal User":
-                        return Response({"error": "Only Admins can log in into the admin"}, status=status.HTTP_401_UNAUTHORIZED)
+                    elif role == "Normal User":
+                        return Response({"error": "Only Admins can log in to the admin portal."}, status=status.HTTP_401_UNAUTHORIZED)
+                    else:
+                        return Response({"error": "User role is not recognized."}, status=status.HTTP_401_UNAUTHORIZED)
                 else:
                     return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
             else:
-                print("the serializer error is ",serializer.errors)
                 return Response(serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except Exception as e:
-             print("the error is", e)
-             return Response({"errors": f"the error is {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)   
+            # Consider using logging instead of print for error reporting
+            print("Error occurred during login:", str(e))
+            return Response({"error": f"An error occurred: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
         
 class CreateOrGetAllAdmins(APIView):
     """

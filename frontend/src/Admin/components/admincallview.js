@@ -9,6 +9,7 @@ const backend_server_url = backendBaseurl(window._env_.REACT_APP_SERVER_MODE)
 
 export function AdminCallView() {
     const [userDetails,setUserDetails] = useState(null)
+    const [isLoading,setIsLoading] = useState(true)
  
     const serverbaseurl = backend_server_url;
 
@@ -23,18 +24,21 @@ export function AdminCallView() {
           },
         })
           .then(response_data => {
+            console.log("ok",response_data.ok)
             if (!response_data.ok) {
               if (response_data.status === 401) {
                 console.log("Not Authorized, Enter V");
               } else if (response_data.status === 400) {
                 console.log("Something Bad Happened, We would resolve it soon");
-                navigate("/error-message");
+                // navigate("/error-message");
               }
             } else if (response_data.ok) {
+              console.log("data",response_data)
               setUserDetails({
                 userID : response_data.user_id,
                 full_name : response_data.full_name
               })
+              setIsLoading(false)
               // return response_data.json();
             }
           })
@@ -49,7 +53,7 @@ export function AdminCallView() {
         <div>
             
             <div>
-            <AdminVideoRoom navigate = {navigate} userDetails = {userDetails} />
+           {isLoading? <p>Loading...</p>: <AdminVideoRoom navigate = {navigate} userDetails = {userDetails} /> } 
             </div>
         </div>
     );

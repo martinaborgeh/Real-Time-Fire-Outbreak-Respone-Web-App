@@ -6,6 +6,7 @@ import  backendBaseurl from "../../dev_prod_config"
 const backend_server_url = backendBaseurl(window._env_.REACT_APP_SERVER_MODE)
 
 export function NormalUserCallView() {
+  const [userDetails,setUserDetails] = useState(null)
   const serverbaseurl = backend_server_url;
   const navigate = useNavigate();
   
@@ -27,7 +28,11 @@ export function NormalUserCallView() {
             console.log("Something Bad Happened, We would resolve it soon");
             navigate("/error-message");
           }
-        } else {
+        } else if (response_data.ok) {
+          setUserDetails({
+            userID : response_data.user_id,
+            full_name : response_data.full_name
+          })
           // return response_data.json();
           
         }
@@ -45,7 +50,7 @@ export function NormalUserCallView() {
   return (
     <div>
       <div>
-      <NormalUserCallVideoRoom navigate = {navigate}  admin_id = {admin_id} />
+      <NormalUserCallVideoRoom navigate = {navigate}  admin_id = {admin_id} userDetails = {userDetails} />
       </div>
     </div>
   )

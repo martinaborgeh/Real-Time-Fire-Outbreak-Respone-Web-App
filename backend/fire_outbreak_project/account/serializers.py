@@ -75,7 +75,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
-    role = serializers.CharField()
+  
 
 
 #Doctor model Serialize

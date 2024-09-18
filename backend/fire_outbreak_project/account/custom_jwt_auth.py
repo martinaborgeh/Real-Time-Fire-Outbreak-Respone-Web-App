@@ -74,6 +74,116 @@ class CustomJWTAuthentication(JWTAuthentication):
 
         # If both authentication methods fail, return None
         return None
+
+# class CustomJWTAuthentication(JWTAuthentication):
+#     def authenticate(self, request):
+#         access_token = request.COOKIES.get('access_token')
+#         if access_token:
+#             try:
+#                 validated_token = self.get_validated_token(access_token)
+#                 user = self.get_user(validated_token)
+#                 return user, validated_token
+#             except Exception as e:
+#                 print(f"Access token validation failed: {e}")
+
+#         refresh_token = request.COOKIES.get('refresh_token')
+#         if refresh_token:
+#             try:
+#                 refresh = RefreshToken(refresh_token)
+#                 if refresh['exp'] > datetime.now(timezone.utc).timestamp():
+#                     new_access_token = str(refresh.access_token)
+#                     response = Response()
+#                     response.set_cookie('access_token', new_access_token, httponly=True)
+#                     user = self.get_user(self.get_validated_token(new_access_token))
+#                     return user, new_access_token
+#                 else:
+#                     raise AuthenticationFailed('Refresh token expired.')
+#             except Exception as e:
+#                 print(f"Refresh token validation failed: {e}")
+
+#         raise AuthenticationFailed('No valid tokens provided.')
+
+
+# from rest_framework_simplejwt.authentication import JWTAuthentication
+# from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+# from rest_framework_simplejwt.tokens import RefreshToken
+# from rest_framework.response import Response
+# from rest_framework.exceptions import AuthenticationFailed
+# from django.conf import settings
+# from datetime import datetime, timezone
+
+
+# class CustomJWTAuthentication(JWTAuthentication):
+#     """
+#     Custom authentication class that checks for access and refresh tokens
+#     in cookies. Refreshes access token if expired using a valid refresh token.
+#     """
+
+#     def authenticate(self, request):
+#         """
+#         Authenticates the request based on access and refresh tokens in cookies.
+
+#         Returns:
+#             A tuple containing the authenticated user and the validated token.
+#         """
+#         # Attempt to authenticate with access token first
+#         user, token = self._authenticate_with_access_token(request)
+#         if user:
+#             return user, token
+
+#         # If access token authentication fails, attempt to refresh using the refresh token
+#         user, token = self._authenticate_with_refresh_token(request)
+#         if user:
+#             return user, token
+
+#         # If both methods fail, return None
+#         return None
+
+#     def _authenticate_with_access_token(self, request):
+#         """
+#         Tries to authenticate the user using the access token from cookies.
+#         """
+#         access_token = request.COOKIES.get('access_token')
+#         if access_token:
+#             try:
+#                 validated_token = self.get_validated_token(access_token)
+#                 user = self.get_user(validated_token)
+#                 if user:
+#                     return user, validated_token
+#             except TokenError:
+#                 print("Invalid access token")
+#         return None, None
+
+#     def _authenticate_with_refresh_token(self, request):
+#         """
+#         Tries to authenticate the user using the refresh token if the access token has expired.
+#         """
+#         refresh_token = request.COOKIES.get('refresh_token')
+#         if refresh_token:
+#             try:
+#                 refresh = RefreshToken(refresh_token)
+
+#                 # Check refresh token expiry
+#                 expiration_timestamp = refresh['exp']
+#                 expiration_time = datetime.fromtimestamp(expiration_timestamp, tz=timezone.utc)
+#                 current_time = datetime.now(timezone.utc)
+
+#                 if current_time >= expiration_time:
+#                     raise AuthenticationFailed('Refresh token has expired, log in again')
+
+#                 # Generate new access token from refresh token
+#                 new_access_token = str(refresh.access_token)
+#                 validated_token = self.get_validated_token(new_access_token)
+#                 user = self.get_user(validated_token)
+
+#                 if user:
+#                     # You should return the new access token from the view, not from here
+#                     return user, validated_token
+#             except (InvalidToken, TokenError):
+#                 raise AuthenticationFailed('Invalid refresh token')
+
+#         return None, None
+
                 
 
 

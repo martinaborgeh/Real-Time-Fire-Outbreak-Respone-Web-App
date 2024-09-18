@@ -32,7 +32,6 @@ DEBUG = bool(os.environ.get("DEBUG"))
 
 INSTALLED_APPS = [
     #Third-Party  Installed app
-    'daphne',
     'adrf',
     'corsheaders',
     'leaflet',
@@ -117,7 +116,7 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'account.CustomUserModel'
 
-SESSION_COOKIE_HTTPONLY = bool(os.environ.get("SESSION_COOKIE_HTTPONLY")) 
+# SESSION_COOKIE_HTTPONLY = bool(os.environ.get("SESSION_COOKIE_HTTPONLY")) 
 
 AUTHENTICATION_BACKENDS = [
     'account.adminrolebanckendauthenticate.RoleBasedBackend',
@@ -128,14 +127,19 @@ AUTHENTICATION_BACKENDS = [
    
 ]
 
-
+'account.custom_jwt_auth.CustomJWTAuthentication'
 
 REST_FRAMEWORK = {
-    
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'account.custom_jwt_auth.CustomJWTAuthentication',  # Adjust this path to your actual class
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication'
     ),
+#     'DEFAULT_PERMISSION_CLASSES': (
+#         'rest_framework.permissions.IsAuthenticated',
+#     ),
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
