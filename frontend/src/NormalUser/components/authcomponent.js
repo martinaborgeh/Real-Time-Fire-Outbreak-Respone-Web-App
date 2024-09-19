@@ -38,6 +38,7 @@ export function SubmitNewNormalUserDetails(){
                     method: 'POST',
                     credentials:'include',
                     headers: {
+                    "ngrok-skip-browser-warning":true,
                     "Content-Type": "application/json",
                     },
                     body: JSON.stringify(SignUpData),
@@ -441,7 +442,7 @@ export function NormalUserLogin(){
                         localStorage.setItem("access",response_data.access)
                         localStorage.setItem("refresh",response_data.refresh)
                         // console.log("refresh",response_data.refresh)
-                        navigate("/welcome-normal-user"); 
+                        navigate("/call-view"); 
                     //    return response_data.json()
                     }
                 })

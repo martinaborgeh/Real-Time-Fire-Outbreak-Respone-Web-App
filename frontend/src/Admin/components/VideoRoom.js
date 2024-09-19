@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import jwtDecode from 'jwt-decode';
+
 import backendBaseurl from "../../dev_prod_config";
 
 const backend_server_url = backendBaseurl(window._env_.REACT_APP_SERVER_MODE);

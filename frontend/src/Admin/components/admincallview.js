@@ -16,15 +16,16 @@ export function AdminCallView() {
     const navigate =  useNavigate ()
 
     useEffect(() => {
-        fetch(serverbaseurl + "/accounts/check-if-user-is-authenticated/", {
+        fetch(serverbaseurl + "/fire-outbreak/call-view/", {
           method: 'GET',
           credentials: 'include',
           headers: {
+            "ngrok-skip-browser-warning":true,
             "Content-Type": "application/json",
           },
         })
           .then(response_data => {
-            console.log("ok",response_data.ok)
+            console.log("ok",response_data.status)
             if (!response_data.ok) {
               if (response_data.status === 401) {
                 console.log("Not Authorized, Enter V");
@@ -32,13 +33,20 @@ export function AdminCallView() {
                 console.log("Something Bad Happened, We would resolve it soon");
                 // navigate("/error-message");
               }
-            } else if (response_data.ok) {
-              console.log("data",response_data)
-              setUserDetails({
-                userID : response_data.user_id,
-                full_name : response_data.full_name
-              })
-              setIsLoading(false)
+            } else if (response_data.ok ) {
+                if(response_data.status ===210){
+                  setUserDetails({
+                    userID : response_data.user_id,
+                    full_name : response_data.full_name
+                  })
+                  setIsLoading(false)
+                }else{
+                  console.log("Try again with valid logins")
+                  navigate("/login-admin-user")
+                }
+                
+                
+             
               // return response_data.json();
             }
           })
@@ -53,6 +61,7 @@ export function AdminCallView() {
         <div>
             
             <div>
+             
            {isLoading? <p>Loading...</p>: <AdminVideoRoom navigate = {navigate} userDetails = {userDetails} /> } 
             </div>
         </div>

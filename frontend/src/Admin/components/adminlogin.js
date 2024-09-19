@@ -27,12 +27,13 @@ export function AdminUserLogin(){
      const handleSubmit = function(event){
         console.log(serverbaseurl)
         event.preventDefault()
-        fetch(serverbaseurl+"/accounts/login-admin/",
+        fetch(serverbaseurl+"/accounts/login/",
 
                 {
                     method: 'POST',
                     credentials:'include',
                     headers: {
+                    "ngrok-skip-browser-warning":true,
                     "Content-Type": "application/json",
                     },
                     body: JSON.stringify(LoginData),
