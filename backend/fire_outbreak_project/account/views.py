@@ -10,7 +10,8 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from rest_framework_simplejwt.authentication import JWTAuthentication
+# from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from datetime import timedelta
 from rest_framework.permissions import IsAuthenticated
 
@@ -35,9 +36,11 @@ from .view_helper_functions import (
     )
 
 from account.custom_jwt_auth import CustomJWTAuthentication
-from account.adminrolebanckendauthenticate import RoleBasedBackend
+# from account.adminrolebanckendauthenticate import RoleBasedBackend
 #Receive new normal user details, store in session to be verified and later send code to the Normal user
 class SendNewUserVerificationCode(APIView):
+
+    # permission_classes = [AllowAny]
 
     def get_formatted_errors(self, errors):
         formatted_errors = {}
@@ -183,17 +186,24 @@ class UpdateNormalUser(APIView):
 #Obtain normal user token for authentication
 class MyObtainTokenPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
+        print("res",response)
         access_token = response.data['access']
         refresh_token = response.data['refresh']
-        
+        request.session['access_token'] = response.data['access']
+        request.session['refresh_token'] = response.data['refresh']
+        print("this is saved session",request.session.get('access_token'))
+        request.session.save()
         # Set tokens in cookies
-        response.set_cookie('access_token', access_token, httponly=True, max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds())
-        response.set_cookie('refresh_token', refresh_token, httponly=True, max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds())
+        # response.set_cookie('access_token', access_token, httponly=True, max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds())
+        # response.set_cookie('refresh_token', refresh_token, httponly=True, max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds())
         
         return response
+
+
 
 
 
@@ -249,22 +259,28 @@ class MyObtainTokenPairView(TokenObtainPairView):
         
    
 class CheckIfUserIsAuthenticated(APIView):
-    # authentication_classes = [CustomJWTAuthentication, RoleBasedBackend]
+    authentication_classes = [CustomJWTAuthentication]
     # permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         # Check if the request.user is authenticated
         user = request.user
-        print(request.headers)
+    
         print(f"Request user: {user}")
+        # return Response({"message":"loaded"})
+        print(user.is_authenticated)
 
-        if user and user.is_authenticated:
+
+        if user and user.is_authenticated and user.role =="Normal User":
+            print( "user_id", user.id)
+            print("full_name", user.full_name)
             # Return the user's ID and full name (assuming 'get_full_name' method exists in the model)
             return Response({
                 "message": "User is authenticated",
                 "user_id": user.id,
-                "full_name": user.full_name()
+                "full_name": user.full_name
             }, status=status.HTTP_200_OK)
+            
         else:
             # If user is not authenticated
             return Response({"message": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -300,36 +316,36 @@ class RegisterAdminUserView(generics.CreateAPIView):
         
 
 
-class LoginAdminUser(APIView):
+# class LoginAdminUser(APIView):
   
 
-    def post(self, request, *args, **kwargs):
-        try:
-            serializer = LoginSerializer(data=request.data)
-            if serializer.is_valid():
-                email = serializer.validated_data['email']
-                password = serializer.validated_data['password']
+#     def post(self, request, *args, **kwargs):
+#         try:
+#             serializer = LoginSerializer(data=request.data)
+#             if serializer.is_valid():
+#                 email = serializer.validated_data['email']
+#                 password = serializer.validated_data['password']
                 
-                # Authenticate user using Django's authenticate function
-                user = authenticate(request, username=email, password=password)
-                if user is not None:
-                    role = getattr(user, 'role', None)
-                    if role in ["SuperUser Admins", "Other Admins"]:
-                        login(request, user)
-                        print(f"User {user} logged in successfully")
-                        return Response({"message": "Login successful."}, status=status.HTTP_200_OK)
-                    elif role == "Normal User":
-                        return Response({"error": "Only Admins can log in to the admin portal."}, status=status.HTTP_401_UNAUTHORIZED)
-                    else:
-                        return Response({"error": "User role is not recognized."}, status=status.HTTP_401_UNAUTHORIZED)
-                else:
-                    return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except Exception as e:
-            # Consider using logging instead of print for error reporting
-            print("Error occurred during login:", str(e))
-            return Response({"error": f"An error occurred: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+#                 # Authenticate user using Django's authenticate function
+#                 user = authenticate(request, username=email, password=password)
+#                 if user is not None:
+#                     role = getattr(user, 'role', None)
+#                     if role in ["SuperUser Admins", "Other Admins"]:
+#                         login(request, user)
+#                         print(f"User {user} logged in successfully")
+#                         return Response({"message": "Login successful."}, status=status.HTTP_200_OK)
+#                     elif role == "Normal User":
+#                         return Response({"error": "Only Admins can log in to the admin portal."}, status=status.HTTP_401_UNAUTHORIZED)
+#                     else:
+#                         return Response({"error": "User role is not recognized."}, status=status.HTTP_401_UNAUTHORIZED)
+#                 else:
+#                     return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
+#             else:
+#                 return Response(serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+#         except Exception as e:
+#             # Consider using logging instead of print for error reporting
+#             print("Error occurred during login:", str(e))
+#             return Response({"error": f"An error occurred: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
         
 class CreateOrGetAllAdmins(APIView):

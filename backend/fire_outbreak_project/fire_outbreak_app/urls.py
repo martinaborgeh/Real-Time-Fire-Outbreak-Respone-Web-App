@@ -13,7 +13,8 @@ GetOneOrUpdateOneFireService,
 GetOneOrUpdateOneFireHydrant,
 GetOneOrUpdateOneFireIncident,
 SearchBestOptimalPath,
-RoomViewSet
+RoomViewSet,
+CallView
 
 )
 
@@ -34,7 +35,7 @@ urlpatterns += [
    path("get-update-one-fire-service-stations/<int:pk>", GetOneOrUpdateOneFireService.as_view(), name="get-update-one-fire-service-stations"),
    path("get-update-one-fire-hydrants/<int:pk>", GetOneOrUpdateOneFireHydrant.as_view(), name="get-update-one-fire-hydrants"),
    path("get-update-one-fire-incidents/<int:pk>", GetOneOrUpdateOneFireIncident.as_view(), name="get-update-one-fire-incidents"),
-
+   path("call-view/",CallView.as_view(),name="call-view")
    
     
 ]

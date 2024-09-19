@@ -18,6 +18,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'ngrok-skip-browser-warning',
     # Add any other custom headers you might need
 ]
+
 # Use secure cookies
 SESSION_COOKIE_SECURE = bool(os.environ.get("SESSION_COOKIE_SECURE"))  # Only send session cookie over HTTPS
 SESSION_COOKIE_HTTPONLY = bool(os.environ.get("SESSION_COOKIE_HTTPONLY"))  # Prevent JavaScript from accessing session cookie

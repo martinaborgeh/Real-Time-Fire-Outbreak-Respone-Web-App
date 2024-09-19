@@ -119,19 +119,22 @@ AUTH_USER_MODEL = 'account.CustomUserModel'
 # SESSION_COOKIE_HTTPONLY = bool(os.environ.get("SESSION_COOKIE_HTTPONLY")) 
 
 AUTHENTICATION_BACKENDS = [
-    'account.adminrolebanckendauthenticate.RoleBasedBackend',
+    # 'account.adminrolebanckendauthenticate.RoleBasedBackend',
      'django.contrib.auth.backends.ModelBackend',
      
  
+
   
    
 ]
 
-'account.custom_jwt_auth.CustomJWTAuthentication'
+
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'account.custom_jwt_auth.CustomJWTAuthentication',  # Adjust this path to your actual class
+        'rest_framework_simplejwt.authentication.JWTAuthentication'
         # 'rest_framework.authentication.SessionAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTAuthentication'
     ),

@@ -3,8 +3,7 @@
 from adrf.views import APIView
 from rest_framework.response import Response
 from rest_framework import status,viewsets
-from rest_framework.permissions import IsAdminUser,AllowAny,IsAuthenticatedOrReadOnly
-
+from rest_framework.permissions import IsAdminUser,IsAuthenticated,AllowAny,IsAuthenticatedOrReadOnly
 
 #Django Modules
 
@@ -207,6 +206,43 @@ class GetOneOrUpdateOneFireIncident(APIView):
         fireincidents = self.get_object(pk)
         fireincidents.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class CallView(APIView):
+    # authenticate_class = [CustomJWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        # Check if the request.user is authenticated
+        user = request.user
+    
+        print(f"Request user: {user}")
+        # return Response({"message":"loaded"})
+        print(user.is_authenticated)
+
+
+        if user and user.is_authenticated and (user.role == "SuperUser Admins" or user.role == "Other Admins"):
+            print( "user_id", user.id)
+            print("full_name", user.full_name)
+            # Return the user's ID and full name (assuming 'get_full_name' method exists in the model)
+            return Response({
+                "message": "User is authenticated",
+                "user_id": user.id,
+                "full_name": user.full_name
+            }, status=210)
+        
+        elif user and user.is_authenticated and user.role == "Normal User":
+            print( "user_id", user.id)
+            print("full_name", user.full_name)
+            # Return the user's ID and full name (assuming 'get_full_name' method exists in the model)
+            return Response({
+                "message": "User is authenticated",
+                "user_id": user.id,
+                "full_name": user.full_name
+            }, status=220)
+            
+        else:
+            # If user is not authenticated
+            return Response({"message": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+
         
 
 class SearchBestOptimalPath(APIView):
