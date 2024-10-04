@@ -743,11 +743,11 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.conf import settings
 
 # Create a Redis client
-redis_client = redis.StrictRedis(
-    host=os.environ.get("CHANNEL_HOST"), 
-    port=os.environ.get("CHANNEL_PORT"), 
-    # db=settings.REDIS_DB
-)
+# redis_client = redis.StrictRedis(
+#     host=os.environ.get("CHANNEL_HOST"), 
+#     port=os.environ.get("CHANNEL_PORT"), 
+#     # db=settings.REDIS_DB
+# )
 
 class VideoConsumer(AsyncWebsocketConsumer):
 

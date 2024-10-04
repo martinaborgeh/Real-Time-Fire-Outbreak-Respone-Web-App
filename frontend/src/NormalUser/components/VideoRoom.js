@@ -667,6 +667,7 @@
 import React, { useState, useEffect } from 'react';
 import backendBaseurl from "../../dev_prod_config";
 const backend_server_url = backendBaseurl(window._env_.REACT_APP_SERVER_MODE);
+console.log("backend_url",backend_server_url)
 
 const ICE_SERVERS= [
   {

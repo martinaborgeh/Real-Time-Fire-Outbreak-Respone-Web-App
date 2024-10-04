@@ -23,6 +23,7 @@ const AdminVideoRoom = ({ navigate, userDetails }) => {
   const [incomingCall, setIncomingCall] = useState(null);
   const [callRequested, setCallRequested] = useState(false);
   const [normaluserId, setNormalUserId] = useState(null);
+ 
 
   console.log(userDetails)
   const { userId, full_name } = userDetails;
@@ -186,6 +187,7 @@ const AdminVideoRoom = ({ navigate, userDetails }) => {
   };
 
   useEffect(() => {
+    console.log("backend url",backend_server_url)
     if (!navigator.mediaDevices) {
       setIsVideoRoomAccessible(false);
       printFeedback({
